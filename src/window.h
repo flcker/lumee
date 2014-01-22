@@ -18,12 +18,16 @@
 #ifndef LUMEE_WINDOW_H
 #define LUMEE_WINDOW_H
 
+#include "model.h"
+
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
   public:
     MainWindow(BaseObjectType*, const Glib::RefPtr<Gtk::Builder>&);
+
+    Glib::RefPtr<DirectoryModel> model;
 };
 
 #endif

@@ -71,6 +71,6 @@ int LumeeApp::on_command_line(
 
 void LumeeApp::on_open(const Gio::Application::type_vec_files& files,
     const Glib::ustring& hint) {
-  // FIXME: Actually open something
   Gtk::Application::on_open(files, hint);
+  main_window->model->open(files[0]);
 }

@@ -16,21 +16,18 @@
  */
 
 #include "window.h"
-#include "model.h"
 
 #include <gtkmm/iconview.h>
 
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
-: Gtk::ApplicationWindow(cobject) {
-  Glib::RefPtr<DirectoryModel> model = DirectoryModel::create();
-
+: Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
   // Set the IconView's model
-  Gtk::IconView *iv;
-  builder->get_widget("icon-view", iv);
-  iv->set_model(model);
-  iv->set_pixbuf_column(model->columns.thumbnail);
-  iv->set_tooltip_column(model->columns.filename.index());
+  Gtk::IconView* icon_view;
+  builder->get_widget("icon-view", icon_view);
+  icon_view->set_model(model);
+  icon_view->set_pixbuf_column(model->columns.thumbnail);
+  icon_view->set_tooltip_column(model->columns.filename.index());
 
   show_all_children();
 }

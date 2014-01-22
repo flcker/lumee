@@ -22,15 +22,17 @@
 
 class DirectoryModel : public Gtk::ListStore {
   public:
+    void open(const Glib::RefPtr<Gio::File>&);
     static Glib::RefPtr<DirectoryModel> create();
 
     struct Columns : public Gtk::TreeModelColumnRecord {
-      Gtk::TreeModelColumn<Glib::ustring> filename;
+      Gtk::TreeModelColumn<std::string> filename;
       Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > thumbnail;
 
       Columns() { add(filename); add(thumbnail); }
     };
     const Columns columns;
+    static const int THUMBNAIL_SIZE = 96;
 };
 
 #endif

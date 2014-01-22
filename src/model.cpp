@@ -17,6 +17,39 @@
 
 #include "model.h"
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+#include <giomm/file.h>
+#include <giomm/fileenumerator.h>
+
+/**
+ * Open a directory, clearing the current list of files (if any) and adding
+ * image files from the new directory to the list.
+ */
+void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
+  // FIXME: Make this async
+  Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
+      G_FILE_ATTRIBUTE_STANDARD_NAME);
+  clear();
+
+  while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
+    Glib::RefPtr<Gdk::Pixbuf> thumbnail;
+    try {
+      // FIXME: Don't block the UI
+      thumbnail = Gdk::Pixbuf::create_from_file(Glib::build_filename(
+            file->get_path(), info->get_name()),
+          THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+    } catch (const Glib::FileError&) {
+      continue;
+    } catch (const Gdk::PixbufError&) {
+      continue;
+    }
+    Gtk::TreeRow row = *(append());
+    row[columns.filename] = info->get_name();
+    row[columns.thumbnail] = thumbnail;
+  }
+}
+
 Glib::RefPtr<DirectoryModel> DirectoryModel::create() {
   Glib::RefPtr<DirectoryModel> model(new DirectoryModel());
   model->set_column_types(model->columns);

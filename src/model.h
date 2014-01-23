@@ -28,9 +28,10 @@ class DirectoryModel : public Gtk::ListStore {
     std::string path;
     struct Columns : public Gtk::TreeModelColumnRecord {
       Gtk::TreeModelColumn<std::string> filename;
+      Gtk::TreeModelColumn<Glib::ustring> escaped_name;
       Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > thumbnail;
 
-      Columns() { add(filename); add(thumbnail); }
+      Columns() { add(filename); add(escaped_name); add(thumbnail); }
     };
     const Columns columns;
     static const int THUMBNAIL_SIZE = 96;

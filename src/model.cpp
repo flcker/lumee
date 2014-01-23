@@ -18,6 +18,7 @@
 #include "model.h"
 
 #include <glibmm/fileutils.h>
+#include <glibmm/markup.h>
 #include <glibmm/miscutils.h>
 #include <giomm/file.h>
 #include <giomm/fileenumerator.h>
@@ -29,7 +30,8 @@
 void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
   // FIXME: Make this async
   Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
-      G_FILE_ATTRIBUTE_STANDARD_NAME);
+      G_FILE_ATTRIBUTE_STANDARD_NAME ","
+      G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME);
   clear();
   path = file->get_path();
 
@@ -46,6 +48,8 @@ void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
     }
     Gtk::TreeRow row = *(append());
     row[columns.filename] = info->get_name();
+    row[columns.escaped_name] = Glib::Markup::escape_text(
+        info->get_display_name());
     row[columns.thumbnail] = thumbnail;
   }
 }

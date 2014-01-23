@@ -27,9 +27,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
 
   icon_view->set_model(model);
   icon_view->set_pixbuf_column(model->columns.thumbnail);
-  // FIXME: Use the file's display name (for UTF-8) and make sure markup
-  // characters are escaped
-  icon_view->set_tooltip_column(model->columns.filename.index());
+  icon_view->set_tooltip_column(model->columns.escaped_name.index());
   icon_view->signal_selection_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
 

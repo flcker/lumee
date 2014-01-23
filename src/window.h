@@ -22,12 +22,20 @@
 
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
+#include <gtkmm/iconview.h>
+#include <gtkmm/image.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
   public:
     MainWindow(BaseObjectType*, const Glib::RefPtr<Gtk::Builder>&);
 
     Glib::RefPtr<DirectoryModel> model;
+
+  private:
+    void on_selection_changed();
+
+    Gtk::IconView* icon_view;
+    Gtk::Image* image;
 };
 
 #endif

@@ -31,14 +31,14 @@ void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
   Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
       G_FILE_ATTRIBUTE_STANDARD_NAME);
   clear();
+  path = file->get_path();
 
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
     Glib::RefPtr<Gdk::Pixbuf> thumbnail;
     try {
       // FIXME: Don't block the UI
-      thumbnail = Gdk::Pixbuf::create_from_file(Glib::build_filename(
-            file->get_path(), info->get_name()),
-          THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+      thumbnail = Gdk::Pixbuf::create_from_file(Glib::build_filename(path,
+            info->get_name()), THUMBNAIL_SIZE, THUMBNAIL_SIZE);
     } catch (const Glib::FileError&) {
       continue;
     } catch (const Gdk::PixbufError&) {

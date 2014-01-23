@@ -17,17 +17,38 @@
 
 #include "window.h"
 
-#include <gtkmm/iconview.h>
+#include <glibmm/miscutils.h>
 
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
 : Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
-  // Set the IconView's model
-  Gtk::IconView* icon_view;
   builder->get_widget("icon-view", icon_view);
+  builder->get_widget("image", image);
+
   icon_view->set_model(model);
   icon_view->set_pixbuf_column(model->columns.thumbnail);
+  // FIXME: Use the file's display name (for UTF-8) and make sure markup
+  // characters are escaped
   icon_view->set_tooltip_column(model->columns.filename.index());
+  icon_view->signal_selection_changed().connect(sigc::mem_fun(*this,
+        &MainWindow::on_selection_changed));
 
   show_all_children();
+}
+
+/**
+ * Set the image based on the icon view's selection.
+ */
+void MainWindow::on_selection_changed() {
+  std::string filename;
+  try {
+    filename = (*(model->get_iter(icon_view->get_selected_items().at(0))))[
+        model->columns.filename];
+  } catch (const std::out_of_range&) {
+    image->clear();   // No selection
+    return;
+  }
+  // FIXME: Don't block the UI
+  image->set(Gdk::Pixbuf::create_from_file(Glib::build_filename(model->path,
+          filename)));
 }

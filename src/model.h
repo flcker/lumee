@@ -25,6 +25,7 @@ class DirectoryModel : public Gtk::ListStore {
     void open(const Glib::RefPtr<Gio::File>&);
     static Glib::RefPtr<DirectoryModel> create();
 
+    std::string path;
     struct Columns : public Gtk::TreeModelColumnRecord {
       Gtk::TreeModelColumn<std::string> filename;
       Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > thumbnail;

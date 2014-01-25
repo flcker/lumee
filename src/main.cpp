@@ -17,6 +17,9 @@
 
 #include "app.h"
 
+// Support C++11 lambdas as sigc functors
+namespace sigc { SIGC_FUNCTORS_DEDUCE_RESULT_TYPE_WITH_DECLTYPE }
+
 int main(int argc, char* argv[]) {
   Glib::RefPtr<LumeeApp> app = LumeeApp::create();
   return app->run(argc, argv);

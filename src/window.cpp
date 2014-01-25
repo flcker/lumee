@@ -31,6 +31,9 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   icon_view->signal_selection_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
 
+  image_worker.signal_finished.connect(
+      [this](Glib::RefPtr<Gdk::Pixbuf> pixbuf) { image->set(pixbuf); });
+
   show_all_children();
 }
 
@@ -46,7 +49,10 @@ void MainWindow::on_selection_changed() {
     image->clear();   // No selection
     return;
   }
-  // FIXME: Don't block the UI
-  image->set(Gdk::Pixbuf::create_from_file(Glib::build_filename(model->path,
-          filename)));
+
+  if (image_cancellable)
+    image_cancellable->cancel();  // Only one image should be loading at a time
+  image_cancellable = Gio::Cancellable::create();
+  image_worker.load(Glib::build_filename(model->path, filename),
+      image_cancellable);
 }

@@ -18,6 +18,7 @@
 #ifndef LUMEE_WINDOW_H
 #define LUMEE_WINDOW_H
 
+#include "image.h"
 #include "model.h"
 
 #include <gtkmm/applicationwindow.h>
@@ -36,6 +37,8 @@ class MainWindow : public Gtk::ApplicationWindow {
 
     Gtk::IconView* icon_view;
     Gtk::Image* image;
+    ImageWorker image_worker;
+    Glib::RefPtr<Gio::Cancellable> image_cancellable;
 };
 
 #endif

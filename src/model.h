@@ -22,14 +22,14 @@
 
 class DirectoryModel : public Gtk::ListStore {
   public:
-    void open(const Glib::RefPtr<Gio::File>&);
+    void open(const Glib::RefPtr<Gio::File>& file);
     static Glib::RefPtr<DirectoryModel> create();
 
     std::string path;
     struct Columns : public Gtk::TreeModelColumnRecord {
       Gtk::TreeModelColumn<std::string> filename;
       Gtk::TreeModelColumn<Glib::ustring> escaped_name;
-      Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > thumbnail;
+      Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thumbnail;
 
       Columns() { add(filename); add(escaped_name); add(thumbnail); }
     };

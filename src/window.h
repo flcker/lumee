@@ -28,7 +28,8 @@
 
 class MainWindow : public Gtk::ApplicationWindow {
   public:
-    MainWindow(BaseObjectType*, const Glib::RefPtr<Gtk::Builder>&);
+    MainWindow(BaseObjectType* cobject,
+        const Glib::RefPtr<Gtk::Builder>& builder);
 
     Glib::RefPtr<DirectoryModel> model;
 

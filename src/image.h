@@ -36,7 +36,7 @@ class ImageWorker {
     void load(const std::string& filename,
         Glib::RefPtr<Gio::Cancellable>& cancellable);
 
-    sigc::signal<void, Glib::RefPtr<Gdk::Pixbuf> > signal_finished;
+    sigc::signal<void, Glib::RefPtr<Gdk::Pixbuf>> signal_finished;
 
   private:
     void create_pixbuf(const std::string& filename,
@@ -45,7 +45,7 @@ class ImageWorker {
 
     Glib::ThreadPool pool;
     Glib::Threads::Mutex mutex;
-    std::queue<Glib::RefPtr<Gdk::Pixbuf> > queue;
+    std::queue<Glib::RefPtr<Gdk::Pixbuf>> queue;
     Glib::Dispatcher dispatcher;
 };
 

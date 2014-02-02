@@ -20,18 +20,19 @@
 
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
-: Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
+    : Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
   builder->get_widget("icon-view", icon_view);
   builder->get_widget("image", image);
 
   icon_view->set_model(model);
+  icon_view->set_item_width(model->THUMBNAIL_SIZE);
   icon_view->set_pixbuf_column(model->columns.thumbnail);
   icon_view->set_tooltip_column(model->columns.escaped_name.index());
   icon_view->signal_selection_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
 
-  image_worker.signal_finished.connect(
-      [this](Glib::RefPtr<Gdk::Pixbuf> pixbuf) { image->set(pixbuf); });
+  image_worker.signal_finished.connect([this](
+        const std::shared_ptr<ImageTask>& task) { image->set(task->pixbuf); });
 
   show_all_children();
 }
@@ -51,7 +52,8 @@ void MainWindow::on_selection_changed() {
 
   if (image_cancellable)
     image_cancellable->cancel();  // Only one image should be loading at a time
-  image_cancellable = Gio::Cancellable::create();
-  image_worker.load(Glib::build_filename(model->path, filename),
-      image_cancellable);
+  std::shared_ptr<ImageTask> task = std::make_shared<ImageTask>(
+      Glib::build_filename(model->path, filename));
+  image_cancellable = task->cancellable;
+  image_worker.load(task);
 }

@@ -17,14 +17,13 @@
 #ifndef LUMEE_MODEL_H
 #define LUMEE_MODEL_H
 
+#include "image.h"
+
+#include <gtkmm/icontheme.h>
 #include <gtkmm/liststore.h>
 
 class DirectoryModel : public Gtk::ListStore {
   public:
-    void open(const Glib::RefPtr<Gio::File>& file);
-    static Glib::RefPtr<DirectoryModel> create();
-
-    std::string path;
     struct Columns : public Gtk::TreeModelColumnRecord {
       Gtk::TreeModelColumn<std::string> filename;
       Gtk::TreeModelColumn<Glib::ustring> escaped_name;
@@ -32,8 +31,20 @@ class DirectoryModel : public Gtk::ListStore {
 
       Columns() { add(filename); add(escaped_name); add(thumbnail); }
     };
+
+    static const int THUMBNAIL_SIZE;
+
+    DirectoryModel();
+    void open(const Glib::RefPtr<Gio::File>& file);
+    void on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task);
+    static Glib::RefPtr<DirectoryModel> create();
+
+    std::string path;
+    ImageWorker image_worker;
+    // TODO: Listen for icon theme changes
+    const Glib::RefPtr<Gdk::Pixbuf> thumbnail_loading_icon =
+        Gtk::IconTheme::get_default()->load_icon("image-loading", 48)->copy();
     const Columns columns;
-    static const int THUMBNAIL_SIZE = 96;
 };
 
 #endif

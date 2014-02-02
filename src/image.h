@@ -18,11 +18,30 @@
 #define LUMEE_IMAGE_H
 
 #include <gdkmm/pixbuf.h>
+#include <gtkmm/treeiter.h>
 #include <glibmm/dispatcher.h>
 #include <glibmm/threadpool.h>
 #include <glibmm/threads.h>
 
 #include <queue>
+
+/**
+ * Task that can be processed by ImageWorker.
+ */
+struct ImageTask {
+  const std::string filename;
+  const int width_and_height;
+  // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
+  // there's a cleaner way to store this.
+  Gtk::TreeIter iter;
+
+  Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+
+  ImageTask(const std::string& filename, const int width_and_height = 0,
+      Gtk::TreeIter iter = Gtk::TreeIter())
+      : filename(filename), width_and_height(width_and_height), iter(iter) {}
+};
 
 /**
  * Load images in a worker thread and return the results asynchronously.
@@ -32,19 +51,17 @@
 class ImageWorker {
   public:
     ImageWorker();
-    void load(const std::string& filename,
-        Glib::RefPtr<Gio::Cancellable>& cancellable);
+    void load(const std::shared_ptr<ImageTask>& task);
 
-    sigc::signal<void, Glib::RefPtr<Gdk::Pixbuf>> signal_finished;
+    sigc::signal<void, std::shared_ptr<ImageTask>> signal_finished;
 
   private:
-    void create_pixbuf(const std::string& filename,
-        Glib::RefPtr<Gio::Cancellable>& cancellable);
+    void create_pixbuf(const std::shared_ptr<ImageTask>& task);
     void emit_finished();
 
     Glib::ThreadPool pool;
     Glib::Threads::Mutex mutex;
-    std::queue<Glib::RefPtr<Gdk::Pixbuf>> queue;
+    std::queue<std::shared_ptr<ImageTask>> queue;
     Glib::Dispatcher dispatcher;
 };
 

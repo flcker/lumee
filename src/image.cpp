@@ -20,40 +20,50 @@ ImageWorker::ImageWorker() : pool(1) {
   dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
 }
 
-void ImageWorker::load(const std::string& filename,
-    Glib::RefPtr<Gio::Cancellable>& cancellable) {
+void ImageWorker::load(const std::shared_ptr<ImageTask>& task) {
+  // TODO: Can we avoid using a shared pointer here?
   pool.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::create_pixbuf),
-        filename, cancellable));
+        task));
 }
 
 // Run in a worker thread
-void ImageWorker::create_pixbuf(const std::string& filename,
-    Glib::RefPtr<Gio::Cancellable>& cancellable) {
-  // The task can be cancelled at any time, even before it starts, so check the
-  // cancellable both before and after creating the pixbuf
-  if (cancellable->is_cancelled())
-    return;
+void ImageWorker::create_pixbuf(const std::shared_ptr<ImageTask>& task) {
+  // The task can be cancelled at any time, including before it starts, so
+  // check the cancellable at multiple points
+  if (task->cancellable->is_cancelled()) return;
+
   // FIXME: Compare Pixbuf::create_from_file's speed with PixbufLoader
   // FIXME: Check if network-mounted or very large images can stall the thread
   // FIXME: Support animated images
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(filename);
-  if (cancellable->is_cancelled())
-    return;
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(
+      task->filename);
+  if (task->cancellable->is_cancelled()) return;
 
+  // Scale the pixbuf, preserving aspect ratio
+  if (task->width_and_height) {
+    int width = pixbuf->get_width();
+    int height = pixbuf->get_height();
+    double factor = (double)task->width_and_height / std::max(width, height);
+    pixbuf = pixbuf->scale_simple(width*factor, height*factor,
+        Gdk::INTERP_BILINEAR);
+    if (task->cancellable->is_cancelled()) return;
+  }
+
+  task->pixbuf = pixbuf;
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    queue.push(pixbuf);
+    queue.push(task);
   }
   dispatcher.emit();
 }
 
 // Run in the main thread
 void ImageWorker::emit_finished() {
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+  std::shared_ptr<ImageTask> task;
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    pixbuf = queue.front();
+    task = queue.front();
     queue.pop();
   }
-  signal_finished.emit(pixbuf);
+  signal_finished.emit(task);
 }

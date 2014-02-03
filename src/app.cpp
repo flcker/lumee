@@ -18,6 +18,7 @@
 
 #include <glibmm/miscutils.h>
 #include <gtkmm/builder.h>
+#include <gtkmm/cssprovider.h>
 #include <gtkmm/settings.h>
 
 LumeeApp::~LumeeApp() {
@@ -41,10 +42,14 @@ void LumeeApp::on_startup() {
   Glib::RefPtr<Gtk::Settings> settings = Gtk::Settings::get_default();
   settings->set_property("gtk-application-prefer-dark-theme", true);
 
+  Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
+  css_provider->load_from_path(Glib::build_filename(DATA_DIR, "main.css"));
+  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
+      css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file(
       Glib::build_filename(DATA_DIR, "main.ui"));
   builder->get_widget_derived("main-window", main_window);
-
   add_window(*main_window);
 }
 

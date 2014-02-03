@@ -8,13 +8,17 @@
       <object id="grid" class="GtkGrid">
         <child>
           <object id="scrolled-window" class="GtkScrolledWindow">
-            <property name="width-request">245</property>
+            <property name="min-content-width">119</property>
             <child>
-              <object id="icon-view" class="GtkIconView">
+              <object id="file-list" class="GtkTreeView">
+                <property name="name">file-list</property>
                 <property name="vexpand">true</property>
-                <property name="selection-mode">GTK_SELECTION_BROWSE</property>
-                <property name="column-spacing">0</property>
-                <property name="row-spacing">0</property>
+                <property name="headers-visible">false</property>
+                <child internal-child="selection">
+                  <object id="file-list-selection" class="GtkTreeSelection">
+                    <property name="mode">GTK_SELECTION_BROWSE</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

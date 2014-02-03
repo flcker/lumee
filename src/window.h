@@ -22,8 +22,8 @@
 
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
-#include <gtkmm/iconview.h>
 #include <gtkmm/image.h>
+#include <gtkmm/treeview.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
   public:
@@ -35,7 +35,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   private:
     void on_selection_changed();
 
-    Gtk::IconView* icon_view;
+    Gtk::TreeView* file_list;
     Gtk::Image* image;
     ImageWorker image_worker;
     Glib::RefPtr<Gio::Cancellable> image_cancellable;

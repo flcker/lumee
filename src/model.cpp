@@ -61,8 +61,6 @@ void DirectoryModel::on_thumbnail_loaded(
     const std::shared_ptr<ImageTask>& task) {
   if (task->iter) {
     Gtk::TreeRow row = *(task->iter);
-    // TODO: GtkIconView is very slow to update when there are a few hundred
-    // rows in the model
     row[columns.thumbnail] = task->pixbuf;
   }
 }

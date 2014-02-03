@@ -21,37 +21,33 @@
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
-  builder->get_widget("icon-view", icon_view);
+  builder->get_widget("file-list", file_list);
   builder->get_widget("image", image);
 
-  icon_view->set_model(model);
-  icon_view->set_item_width(model->THUMBNAIL_SIZE);
-  icon_view->set_pixbuf_column(model->columns.thumbnail);
-  icon_view->set_tooltip_column(model->columns.escaped_name.index());
-  icon_view->signal_selection_changed().connect(sigc::mem_fun(*this,
+  file_list->set_model(model);
+  file_list->append_column("", model->columns.thumbnail);
+  file_list->set_tooltip_column(model->columns.escaped_name.index());
+  file_list->get_selection()->signal_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
 
   image_worker.signal_finished.connect([this](
         const std::shared_ptr<ImageTask>& task) { image->set(task->pixbuf); });
-
   show_all_children();
 }
 
 /**
- * Set the image based on the icon view's selection.
+ * Set the image based on the file list's selection.
  */
 void MainWindow::on_selection_changed() {
-  std::string filename;
-  try {
-    filename = (*(model->get_iter(icon_view->get_selected_items().at(0))))[
-        model->columns.filename];
-  } catch (const std::out_of_range&) {
-    image->clear();   // No selection
+  if (image_cancellable)
+    image_cancellable->cancel();  // Only one image should be loading at a time
+  Gtk::TreeIter iter = file_list->get_selection()->get_selected();
+  if (!iter) {  // No selection
+    image->clear();
     return;
   }
 
-  if (image_cancellable)
-    image_cancellable->cancel();  // Only one image should be loading at a time
+  std::string filename = (*iter)[model->columns.filename];
   std::shared_ptr<ImageTask> task = std::make_shared<ImageTask>(
       Glib::build_filename(model->path, filename));
   image_cancellable = task->cancellable;

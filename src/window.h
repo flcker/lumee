@@ -17,7 +17,7 @@
 #ifndef LUMEE_WINDOW_H
 #define LUMEE_WINDOW_H
 
-#include "image.h"
+#include "image_worker.h"
 #include "model.h"
 
 #include <gtkmm/applicationwindow.h>
@@ -26,19 +26,19 @@
 #include <gtkmm/treeview.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
-  public:
-    MainWindow(BaseObjectType* cobject,
-        const Glib::RefPtr<Gtk::Builder>& builder);
+ public:
+  MainWindow(BaseObjectType* cobject,
+      const Glib::RefPtr<Gtk::Builder>& builder);
 
-    Glib::RefPtr<DirectoryModel> model;
+  Glib::RefPtr<DirectoryModel> model;
 
-  private:
-    void on_selection_changed();
+ private:
+  void on_selection_changed();
 
-    Gtk::TreeView* file_list;
-    Gtk::Image* image;
-    ImageWorker image_worker;
-    Glib::RefPtr<Gio::Cancellable> image_cancellable;
+  Gtk::TreeView* file_list;
+  Gtk::Image* image;
+  ImageWorker image_worker;
+  Glib::RefPtr<Gio::Cancellable> image_cancellable;
 };
 
 #endif

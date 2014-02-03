@@ -22,20 +22,20 @@
 #include <gtkmm/application.h>
 
 class LumeeApp : public Gtk::Application {
-  public:
-    virtual ~LumeeApp();
-    static Glib::RefPtr<LumeeApp> create();
+ public:
+  virtual ~LumeeApp();
+  static Glib::RefPtr<LumeeApp> create();
 
-  protected:
-    LumeeApp();
-    virtual void on_startup();
-    virtual int on_command_line(
-        const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line);
-    virtual void on_open(const Gio::Application::type_vec_files& files,
-        const Glib::ustring& hint);
+ protected:
+  LumeeApp();
+  virtual void on_startup();
+  virtual int on_command_line(
+      const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line);
+  virtual void on_open(const Gio::Application::type_vec_files& files,
+      const Glib::ustring& hint);
 
-  private:
-    MainWindow *main_window;
+ private:
+  MainWindow *main_window;
 };
 
 #endif

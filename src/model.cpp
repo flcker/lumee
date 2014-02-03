@@ -34,7 +34,7 @@ DirectoryModel::DirectoryModel() : Gtk::ListStore() {
  * image files from the new directory to the list.
  */
 void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
-  // FIXME: Make this async
+  // TODO: Make this async
   Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME);

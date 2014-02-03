@@ -14,8 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LUMEE_IMAGE_H
-#define LUMEE_IMAGE_H
+#ifndef LUMEE_IMAGE_WORKER_H
+#define LUMEE_IMAGE_WORKER_H
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/treeiter.h>
@@ -49,20 +49,20 @@ struct ImageTask {
  * Connect to signal_finished to get notified when an image is done.
  */
 class ImageWorker {
-  public:
-    ImageWorker();
-    void load(const std::shared_ptr<ImageTask>& task);
+ public:
+  ImageWorker();
+  void load(const std::shared_ptr<ImageTask>& task);
 
-    sigc::signal<void, std::shared_ptr<ImageTask>> signal_finished;
+  sigc::signal<void, std::shared_ptr<ImageTask>> signal_finished;
 
-  private:
-    void create_pixbuf(const std::shared_ptr<ImageTask>& task);
-    void emit_finished();
+ private:
+  void create_pixbuf(const std::shared_ptr<ImageTask>& task);
+  void emit_finished();
 
-    Glib::ThreadPool pool;
-    Glib::Threads::Mutex mutex;
-    std::queue<std::shared_ptr<ImageTask>> queue;
-    Glib::Dispatcher dispatcher;
+  Glib::ThreadPool pool;
+  Glib::Threads::Mutex mutex;
+  std::queue<std::shared_ptr<ImageTask>> queue;
+  Glib::Dispatcher dispatcher;
 };
 
 #endif

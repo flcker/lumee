@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "image.h"
+#include "image_worker.h"
 
 ImageWorker::ImageWorker() : pool(1) {
   dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
@@ -32,9 +32,9 @@ void ImageWorker::create_pixbuf(const std::shared_ptr<ImageTask>& task) {
   // check the cancellable at multiple points
   if (task->cancellable->is_cancelled()) return;
 
-  // FIXME: Compare Pixbuf::create_from_file's speed with PixbufLoader
-  // FIXME: Check if network-mounted or very large images can stall the thread
-  // FIXME: Support animated images
+  // TODO: Compare Pixbuf::create_from_file's speed with PixbufLoader
+  // TODO: Check if network-mounted or very large images can stall the thread
+  // TODO: Support animated images
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(
       task->filename);
   if (task->cancellable->is_cancelled()) return;

@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++11 -MMD -MF $(dir $*).deps/$(notdir $*).d -MP \
 		   -DDATA_DIR=\""$(shell pwd)/data"\"
 LDLIBS = $(shell pkg-config --libs gtkmm-3.0)
 
-objects = src/app.o src/image.o src/main.o src/model.o src/window.o
+objects = src/app.o src/image_worker.o src/main.o src/model.o src/window.o
 
 all: src/.deps/ lumee
 src/.deps/:

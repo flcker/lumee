@@ -41,20 +41,27 @@ void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
   // TODO: Need to be able to cancel all image_worker thumbnail tasks from the
   // previous directory
   clear();
-  path = file->get_path();
+  signal_path_changed.emit(file->get_parse_name());
 
   // TODO: Only add files with a supported image format (check content type)
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
     Gtk::TreeIter iter = append();
     Gtk::TreeRow row = *iter;
-    row[columns.filename] = info->get_name();
+    row[columns.path] = Glib::build_filename(file->get_path(),
+        info->get_name());
     row[columns.escaped_name] = Glib::Markup::escape_text(
         info->get_display_name());
     row[columns.thumbnail] = thumbnail_loading_icon;
 
-    image_worker.load(std::make_shared<ImageTask>(Glib::build_filename(path,
-            info->get_name()), THUMBNAIL_SIZE, iter));
+    image_worker.load(std::make_shared<ImageTask>(row[columns.path],
+          THUMBNAIL_SIZE, iter));
   }
+}
+
+Glib::RefPtr<DirectoryModel> DirectoryModel::create() {
+  Glib::RefPtr<DirectoryModel> model(new DirectoryModel());
+  model->set_column_types(model->columns);
+  return model;
 }
 
 void DirectoryModel::on_thumbnail_loaded(
@@ -63,10 +70,4 @@ void DirectoryModel::on_thumbnail_loaded(
     Gtk::TreeRow row = *(task->iter);
     row[columns.thumbnail] = task->pixbuf;
   }
-}
-
-Glib::RefPtr<DirectoryModel> DirectoryModel::create() {
-  Glib::RefPtr<DirectoryModel> model(new DirectoryModel());
-  model->set_column_types(model->columns);
-  return model;
 }

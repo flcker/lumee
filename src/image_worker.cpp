@@ -35,8 +35,7 @@ void ImageWorker::create_pixbuf(const std::shared_ptr<ImageTask>& task) {
   // TODO: Compare Pixbuf::create_from_file's speed with PixbufLoader
   // TODO: Check if network-mounted or very large images can stall the thread
   // TODO: Support animated images
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(
-      task->filename);
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(task->path);
   if (task->cancellable->is_cancelled()) return;
 
   // Scale the pixbuf, preserving aspect ratio

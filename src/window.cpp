@@ -16,13 +16,19 @@
 
 #include "window.h"
 
+#include <glibmm/convert.h>
 #include <glibmm/miscutils.h>
 
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
+  builder->get_widget("header-bar", header_bar);
   builder->get_widget("file-list", file_list);
   builder->get_widget("image", image);
+
+  model->signal_path_changed.connect([this](const Glib::ustring& dir_path) {
+    header_bar->set_title(Glib::path_get_basename(dir_path));
+  });
 
   file_list->set_model(model);
   file_list->append_column("", model->columns.thumbnail);
@@ -30,13 +36,13 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   file_list->get_selection()->signal_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
 
-  image_worker.signal_finished.connect([this](
-        const std::shared_ptr<ImageTask>& task) { image->set(task->pixbuf); });
+  image_worker.signal_finished.connect(sigc::mem_fun(*this,
+        &MainWindow::on_image_loaded));
   show_all_children();
 }
 
 /**
- * Set the image based on the file list's selection.
+ * Load an image based on the file list's selection.
  */
 void MainWindow::on_selection_changed() {
   if (image_cancellable)
@@ -44,12 +50,21 @@ void MainWindow::on_selection_changed() {
   Gtk::TreeIter iter = file_list->get_selection()->get_selected();
   if (!iter) {  // No selection
     image->clear();
+    header_bar->set_subtitle("");
     return;
   }
 
-  std::string filename = (*iter)[model->columns.filename];
-  std::shared_ptr<ImageTask> task = std::make_shared<ImageTask>(
-      Glib::build_filename(model->path, filename));
+  std::shared_ptr<ImageTask> task = std::make_shared<ImageTask>((*iter)[
+      model->columns.path]);
   image_cancellable = task->cancellable;
   image_worker.load(task);
+}
+
+/**
+ * Display an image that finished loading.
+ */
+void MainWindow::on_image_loaded(const std::shared_ptr<ImageTask>& task) {
+  image->set(task->pixbuf);
+  header_bar->set_subtitle(Glib::filename_to_utf8(Glib::path_get_basename(
+          task->path)));
 }

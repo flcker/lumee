@@ -25,26 +25,29 @@
 class DirectoryModel : public Gtk::ListStore {
  public:
   struct Columns : public Gtk::TreeModelColumnRecord {
-    Gtk::TreeModelColumn<std::string> filename;
+    Gtk::TreeModelColumn<std::string> path;
     Gtk::TreeModelColumn<Glib::ustring> escaped_name;
     Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thumbnail;
 
-    Columns() { add(filename); add(escaped_name); add(thumbnail); }
+    Columns() { add(path); add(escaped_name); add(thumbnail); }
   };
 
   static const int THUMBNAIL_SIZE;
 
   DirectoryModel();
   void open(const Glib::RefPtr<Gio::File>& file);
-  void on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task);
   static Glib::RefPtr<DirectoryModel> create();
 
-  std::string path;
+  sigc::signal<void, Glib::ustring> signal_path_changed;
+  const Columns columns;
+
+ private:
+  void on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task);
+
   ImageWorker image_worker;
   // TODO: Listen for icon theme changes
   const Glib::RefPtr<Gdk::Pixbuf> thumbnail_loading_icon =
       Gtk::IconTheme::get_default()->load_icon("image-loading", 48)->copy();
-  const Columns columns;
 };
 
 #endif

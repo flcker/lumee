@@ -2,8 +2,13 @@
   <object id="main-window" class="GtkApplicationWindow">
     <property name="title">Lumee</property>
     <property name="default-width">800</property>
-    <property name="default-height">450</property>
+    <property name="default-height">500</property>
     <property name="window-position">GTK_WIN_POS_CENTER</property>
+    <child type="titlebar">
+      <object id="header-bar" class="GtkHeaderBar">
+        <property name="show-close-button">true</property>
+      </object>
+    </child>
     <child>
       <object id="grid" class="GtkGrid">
         <child>

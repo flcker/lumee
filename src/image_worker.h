@@ -29,7 +29,7 @@
  * Task that can be processed by ImageWorker.
  */
 struct ImageTask {
-  const std::string filename;
+  const std::string path;
   const int width_and_height;
   // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
   // there's a cleaner way to store this.
@@ -38,9 +38,9 @@ struct ImageTask {
   Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
-  ImageTask(const std::string& filename, const int width_and_height = 0,
+  ImageTask(const std::string& path, const int width_and_height = 0,
       Gtk::TreeIter iter = Gtk::TreeIter())
-      : filename(filename), width_and_height(width_and_height), iter(iter) {}
+      : path(path), width_and_height(width_and_height), iter(iter) {}
 };
 
 /**

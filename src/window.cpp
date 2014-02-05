@@ -17,7 +17,6 @@
 #include "window.h"
 
 #include <glibmm/convert.h>
-#include <glibmm/miscutils.h>
 
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
@@ -26,8 +25,8 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget("file-list", file_list);
   builder->get_widget("image", image);
 
-  model->signal_path_changed.connect([this](const Glib::ustring& dir_path) {
-    header_bar->set_title(Glib::path_get_basename(dir_path));
+  model->signal_path_changed.connect([this](const std::string& dir_path) {
+    header_bar->set_title(Glib::filename_display_basename(dir_path));
   });
 
   file_list->set_model(model);
@@ -65,6 +64,5 @@ void MainWindow::on_selection_changed() {
  */
 void MainWindow::on_image_loaded(const std::shared_ptr<ImageTask>& task) {
   image->set(task->pixbuf);
-  header_bar->set_subtitle(Glib::filename_to_utf8(Glib::path_get_basename(
-          task->path)));
+  header_bar->set_subtitle(Glib::filename_display_basename(task->path));
 }

@@ -7,6 +7,18 @@
     <child type="titlebar">
       <object id="header-bar" class="GtkHeaderBar">
         <property name="show-close-button">true</property>
+        <child>
+          <object id="open-button" class="GtkButton">
+            <property name="action-name">win.open</property>
+            <property name="tooltip-text" translatable="yes">Open folder</property>
+            <child>
+              <object id="open-button-image" class="GtkImage">
+                <property name="icon-name">folder-symbolic</property>
+                <property name="icon-size">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
     <child>

@@ -41,7 +41,6 @@ void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
   // TODO: Need to be able to cancel all image_worker thumbnail tasks from the
   // previous directory
   clear();
-  signal_path_changed.emit(file->get_path());
 
   // TODO: Only add files with a supported image format (check content type)
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {

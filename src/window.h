@@ -30,16 +30,20 @@ class MainWindow : public Gtk::ApplicationWindow {
  public:
   MainWindow(BaseObjectType* cobject,
       const Glib::RefPtr<Gtk::Builder>& builder);
-
-  Glib::RefPtr<DirectoryModel> model;
+  void open(const Glib::RefPtr<Gio::File>& file);
 
  private:
   void on_selection_changed();
   void on_image_loaded(const std::shared_ptr<ImageTask>& task);
+  void open_file_chooser();
 
   Gtk::HeaderBar* header_bar;
   Gtk::TreeView* file_list;
   Gtk::Image* image;
+
+  Glib::RefPtr<DirectoryModel> model = DirectoryModel::create();
+  std::string folder_path;
+
   ImageWorker image_worker;
   Glib::RefPtr<Gio::Cancellable> image_cancellable;
 };

@@ -17,17 +17,17 @@
 #include "window.h"
 
 #include <glibmm/convert.h>
+#include <glibmm/i18n.h>
+#include <gtkmm/filechooserdialog.h>
 
 MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
-    : Gtk::ApplicationWindow(cobject), model(DirectoryModel::create()) {
+    : Gtk::ApplicationWindow(cobject) {
   builder->get_widget("header-bar", header_bar);
   builder->get_widget("file-list", file_list);
   builder->get_widget("image", image);
 
-  model->signal_path_changed.connect([this](const std::string& dir_path) {
-    header_bar->set_title(Glib::filename_display_basename(dir_path));
-  });
+  add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
 
   file_list->set_model(model);
   file_list->append_column("", model->columns.thumbnail);
@@ -38,6 +38,15 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   image_worker.signal_finished.connect(sigc::mem_fun(*this,
         &MainWindow::on_image_loaded));
   show_all_children();
+}
+
+/**
+ * Open a folder.
+ */
+void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
+  model->open(file);
+  folder_path = file->get_path();
+  header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
 
 /**
@@ -65,4 +74,17 @@ void MainWindow::on_selection_changed() {
 void MainWindow::on_image_loaded(const std::shared_ptr<ImageTask>& task) {
   image->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
+}
+
+/**
+ * Open a folder with a file chooser dialog.
+ */
+void MainWindow::open_file_chooser() {
+  Gtk::FileChooserDialog chooser(*this, _("Open Folder"),
+      Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+  chooser.add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
+  chooser.add_button(_("_Open"), Gtk::RESPONSE_ACCEPT);
+  chooser.set_current_folder(folder_path);
+  if (chooser.run() == Gtk::RESPONSE_ACCEPT)
+    open(Gio::File::create_for_path(chooser.get_filename()));
 }

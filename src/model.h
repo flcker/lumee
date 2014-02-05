@@ -38,7 +38,6 @@ class DirectoryModel : public Gtk::ListStore {
   void open(const Glib::RefPtr<Gio::File>& file);
   static Glib::RefPtr<DirectoryModel> create();
 
-  sigc::signal<void, std::string const> signal_path_changed;
   const Columns columns;
 
  private:

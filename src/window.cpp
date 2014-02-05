@@ -24,15 +24,15 @@ MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject) {
   builder->get_widget("header-bar", header_bar);
-  builder->get_widget("file-list", file_list);
+  builder->get_widget("list-view", list_view);
   builder->get_widget("image", image);
 
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
 
-  file_list->set_model(model);
-  file_list->append_column("", model->columns.thumbnail);
-  file_list->set_tooltip_column(model->columns.escaped_name.index());
-  file_list->get_selection()->signal_changed().connect(sigc::mem_fun(*this,
+  list_view->set_model(image_list);
+  list_view->append_column("", image_list->columns.thumbnail);
+  list_view->set_tooltip_column(image_list->columns.escaped_name.index());
+  list_view->get_selection()->signal_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
 
   image_worker.signal_finished.connect(sigc::mem_fun(*this,
@@ -44,7 +44,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
  * Open a folder.
  */
 void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
-  model->open(file);
+  image_list->open_folder(file);
   folder_path = file->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
@@ -55,7 +55,7 @@ void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
 void MainWindow::on_selection_changed() {
   if (image_cancellable)
     image_cancellable->cancel();  // Only one image should be loading at a time
-  Gtk::TreeIter iter = file_list->get_selection()->get_selected();
+  Gtk::TreeIter iter = list_view->get_selection()->get_selected();
   if (!iter) {  // No selection
     image->clear();
     header_bar->set_subtitle("");
@@ -63,7 +63,7 @@ void MainWindow::on_selection_changed() {
   }
 
   std::shared_ptr<ImageTask> task = std::make_shared<ImageTask>((*iter)[
-      model->columns.path]);
+      image_list->columns.path]);
   image_cancellable = task->cancellable;
   image_worker.load(task);
 }

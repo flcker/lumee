@@ -14,15 +14,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LUMEE_MODEL_H
-#define LUMEE_MODEL_H
+#ifndef LUMEE_IMAGE_LIST_H
+#define LUMEE_IMAGE_LIST_H
 
 #include "image_worker.h"
 
 #include <gtkmm/icontheme.h>
 #include <gtkmm/liststore.h>
 
-class DirectoryModel : public Gtk::ListStore {
+/**
+ * A model that stores a list of image files with thumbnails.
+ */
+class ImageList : public Gtk::ListStore {
  public:
   struct Columns : public Gtk::TreeModelColumnRecord {
     Gtk::TreeModelColumn<std::string> path;
@@ -34,9 +37,9 @@ class DirectoryModel : public Gtk::ListStore {
 
   static const int THUMBNAIL_SIZE;
 
-  DirectoryModel();
-  void open(const Glib::RefPtr<Gio::File>& file);
-  static Glib::RefPtr<DirectoryModel> create();
+  ImageList();
+  void open_folder(const Glib::RefPtr<Gio::File>& file);
+  static Glib::RefPtr<ImageList> create();
 
   const Columns columns;
 

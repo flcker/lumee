@@ -27,12 +27,12 @@
           <object id="scrolled-window" class="GtkScrolledWindow">
             <property name="min-content-width">119</property>
             <child>
-              <object id="file-list" class="GtkTreeView">
+              <object id="list-view" class="GtkTreeView">
                 <property name="name">file-list</property>
                 <property name="vexpand">true</property>
                 <property name="headers-visible">false</property>
                 <child internal-child="selection">
-                  <object id="file-list-selection" class="GtkTreeSelection">
+                  <object id="list-selection" class="GtkTreeSelection">
                     <property name="mode">GTK_SELECTION_BROWSE</property>
                   </object>
                 </child>

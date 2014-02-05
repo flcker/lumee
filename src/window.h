@@ -17,8 +17,8 @@
 #ifndef LUMEE_WINDOW_H
 #define LUMEE_WINDOW_H
 
+#include "image_list.h"
 #include "image_worker.h"
-#include "model.h"
 
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
@@ -38,10 +38,10 @@ class MainWindow : public Gtk::ApplicationWindow {
   void open_file_chooser();
 
   Gtk::HeaderBar* header_bar;
-  Gtk::TreeView* file_list;
+  Gtk::TreeView* list_view;
   Gtk::Image* image;
 
-  Glib::RefPtr<DirectoryModel> model = DirectoryModel::create();
+  Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;
 
   ImageWorker image_worker;

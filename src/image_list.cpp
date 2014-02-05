@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "model.h"
+#include "image_list.h"
 
 #include <glibmm/fileutils.h>
 #include <glibmm/markup.h>
@@ -22,24 +22,23 @@
 #include <giomm/file.h>
 #include <giomm/fileenumerator.h>
 
-const int DirectoryModel::THUMBNAIL_SIZE = 96;
+const int ImageList::THUMBNAIL_SIZE = 96;
 
-DirectoryModel::DirectoryModel() : Gtk::ListStore() {
+ImageList::ImageList() : Gtk::ListStore() {
   image_worker.signal_finished.connect(sigc::mem_fun(*this,
-        &DirectoryModel::on_thumbnail_loaded));
+        &ImageList::on_thumbnail_loaded));
 }
 
 /**
- * Open a directory, clearing the current list of files (if any) and adding
- * image files from the new directory to the list.
+ * Open a folder, replacing the current list with the folder's images.
  */
-void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
+void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
   // TODO: Make this async
   Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME);
   // TODO: Need to be able to cancel all image_worker thumbnail tasks from the
-  // previous directory
+  // previous folder
   clear();
 
   // TODO: Only add files with a supported image format (check content type)
@@ -57,14 +56,13 @@ void DirectoryModel::open(const Glib::RefPtr<Gio::File>& file) {
   }
 }
 
-Glib::RefPtr<DirectoryModel> DirectoryModel::create() {
-  Glib::RefPtr<DirectoryModel> model(new DirectoryModel());
+Glib::RefPtr<ImageList> ImageList::create() {
+  Glib::RefPtr<ImageList> model(new ImageList());
   model->set_column_types(model->columns);
   return model;
 }
 
-void DirectoryModel::on_thumbnail_loaded(
-    const std::shared_ptr<ImageTask>& task) {
+void ImageList::on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task) {
   if (task->iter) {
     Gtk::TreeRow row = *(task->iter);
     row[columns.thumbnail] = task->pixbuf;

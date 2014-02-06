@@ -44,8 +44,10 @@ class ImageList : public Gtk::ListStore {
   const Columns columns;
 
  private:
+  bool is_supported_mime_type(const Glib::ustring& mime_type);
   void on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task);
 
+  std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;
   // TODO: Listen for icon theme changes
   const Glib::RefPtr<Gdk::Pixbuf> thumbnail_loading_icon =

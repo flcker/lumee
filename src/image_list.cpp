@@ -16,15 +16,22 @@
 
 #include "image_list.h"
 
+#include <giomm/file.h>
+#include <giomm/fileenumerator.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/markup.h>
 #include <glibmm/miscutils.h>
-#include <giomm/file.h>
-#include <giomm/fileenumerator.h>
 
 const int ImageList::THUMBNAIL_SIZE = 96;
 
 ImageList::ImageList() : Gtk::ListStore() {
+  // Build list of supported image MIME types
+  for (Gdk::PixbufFormat format : Gdk::Pixbuf::get_formats()) {
+    std::vector<Glib::ustring> mime_types = format.get_mime_types();
+    supported_mime_types.insert(end(supported_mime_types), begin(mime_types),
+        end(mime_types));
+  }
+
   image_worker.signal_finished.connect(sigc::mem_fun(*this,
         &ImageList::on_thumbnail_loaded));
 }
@@ -35,14 +42,18 @@ ImageList::ImageList() : Gtk::ListStore() {
 void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
   // TODO: Make this async
   Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
+      G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
-      G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME);
+      G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
+      G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
   // TODO: Need to be able to cancel all image_worker thumbnail tasks from the
   // previous folder
   clear();
 
-  // TODO: Only add files with a supported image format (check content type)
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
+    if (info->is_hidden() || !is_supported_mime_type(info->get_content_type()))
+      continue;
+
     Gtk::TreeIter iter = append();
     Gtk::TreeRow row = *iter;
     row[columns.path] = Glib::build_filename(file->get_path(),
@@ -60,6 +71,11 @@ Glib::RefPtr<ImageList> ImageList::create() {
   Glib::RefPtr<ImageList> model(new ImageList());
   model->set_column_types(model->columns);
   return model;
+}
+
+bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
+  return std::find(begin(supported_mime_types), end(supported_mime_types),
+      mime_type) != end(supported_mime_types);
 }
 
 void ImageList::on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task) {

@@ -24,6 +24,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/headerbar.h>
 #include <gtkmm/image.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
@@ -40,6 +41,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   Gtk::HeaderBar* header_bar;
   Gtk::TreeView* list_view;
   Gtk::Image* image;
+  Gtk::ScrolledWindow* image_scroll;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;

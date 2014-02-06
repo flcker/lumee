@@ -41,7 +41,7 @@
           </object>
         </child>
         <child>
-          <object id="scrolled-window-2" class="GtkScrolledWindow">
+          <object id="image-scroll" class="GtkScrolledWindow">
             <child>
               <object id="image" class="GtkImage">
                 <property name="hexpand">true</property>

@@ -26,6 +26,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget("header-bar", header_bar);
   builder->get_widget("list-view", list_view);
   builder->get_widget("image", image);
+  builder->get_widget("image-scroll", image_scroll);
 
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
 
@@ -74,6 +75,8 @@ void MainWindow::on_selection_changed() {
 void MainWindow::on_image_loaded(const std::shared_ptr<ImageTask>& task) {
   image->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
+  image_scroll->get_hadjustment()->set_value(0);
+  image_scroll->get_vadjustment()->set_value(0);
 }
 
 /**

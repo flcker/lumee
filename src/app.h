@@ -19,6 +19,7 @@
 
 #include "window.h"
 
+#include <gtkmm/aboutdialog.h>
 #include <gtkmm/application.h>
 
 class LumeeApp : public Gtk::Application {
@@ -35,7 +36,11 @@ class LumeeApp : public Gtk::Application {
       const Glib::ustring& hint);
 
  private:
-  MainWindow *main_window;
+  void show_about_dialog();
+  void hide_all_windows();
+
+  MainWindow* main_window;
+  std::unique_ptr<Gtk::AboutDialog> about_dialog;
 };
 
 #endif

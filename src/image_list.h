@@ -45,7 +45,7 @@ class ImageList : public Gtk::ListStore {
 
  private:
   bool is_supported_mime_type(const Glib::ustring& mime_type);
-  void on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task);
+  void on_thumbnail_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;

@@ -46,8 +46,7 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
-  // TODO: Need to be able to cancel all image_worker thumbnail tasks from the
-  // previous folder
+  image_worker.cancel_all();  // Cancel everything from the previous folder.
   clear();
 
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
@@ -56,14 +55,12 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
 
     Gtk::TreeIter iter = append();
     Gtk::TreeRow row = *iter;
-    row[columns.path] = Glib::build_filename(file->get_path(),
-        info->get_name());
-    row[columns.escaped_name] = Glib::Markup::escape_text(
-        info->get_display_name());
+    row[columns.path] =
+        Glib::build_filename(file->get_path(), info->get_name());
+    row[columns.escaped_name] =
+        Glib::Markup::escape_text(info->get_display_name());
     row[columns.thumbnail] = thumbnail_loading_icon;
-
-    image_worker.load(std::make_shared<ImageTask>(row[columns.path],
-          THUMBNAIL_SIZE, iter));
+    image_worker.load(row[columns.path], THUMBNAIL_SIZE, iter);
   }
 }
 
@@ -78,9 +75,10 @@ bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
       mime_type) != end(supported_mime_types);
 }
 
-void ImageList::on_thumbnail_loaded(const std::shared_ptr<ImageTask>& task) {
+void ImageList::on_thumbnail_loaded(
+    const std::shared_ptr<ImageWorker::Task>& task) {
   if (task->iter) {
-    Gtk::TreeRow row = *(task->iter);
+    Gtk::TreeRow row = *task->iter;
     row[columns.thumbnail] = task->pixbuf;
   }
 }

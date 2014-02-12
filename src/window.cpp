@@ -54,25 +54,21 @@ void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
  * Load an image based on the file list's selection.
  */
 void MainWindow::on_selection_changed() {
-  if (image_cancellable)
-    image_cancellable->cancel();  // Only one image should be loading at a time
+  image_worker.cancel_all();  // Only one image should be loading at a time
   Gtk::TreeIter iter = list_view->get_selection()->get_selected();
   if (!iter) {  // No selection
     image->clear();
     header_bar->set_subtitle("");
     return;
   }
-
-  std::shared_ptr<ImageTask> task = std::make_shared<ImageTask>((*iter)[
-      image_list->columns.path]);
-  image_cancellable = task->cancellable;
-  image_worker.load(task);
+  image_worker.load((*iter)[image_list->columns.path]);
 }
 
 /**
  * Display an image that finished loading.
  */
-void MainWindow::on_image_loaded(const std::shared_ptr<ImageTask>& task) {
+void MainWindow::on_image_loaded(
+    const std::shared_ptr<ImageWorker::Task>& task) {
   image->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
   image_scroll->get_hadjustment()->set_value(0);

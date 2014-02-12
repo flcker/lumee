@@ -16,53 +16,74 @@
 
 #include "image_worker.h"
 
-ImageWorker::ImageWorker() : pool(1) {
+#include <giomm/error.h>
+
+ImageWorker::ImageWorker() {
+  // Since a single cancellable is reused, it should be reset before each task.
+  work_queue.on_popped = [this]() { cancellable->reset(); };
   dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
 }
 
-void ImageWorker::load(const std::shared_ptr<ImageTask>& task) {
-  // TODO: Can we avoid using a shared pointer here?
-  pool.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::create_pixbuf),
-        task));
+void ImageWorker::load(const std::string& path, const int width_and_height,
+    Gtk::TreeIter iter) {
+  work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
+        sigc::mem_fun(*this, &ImageWorker::do_load),
+        std::make_shared<Task>(path, width_and_height, iter)));
 }
 
-// Run in a worker thread
-void ImageWorker::create_pixbuf(const std::shared_ptr<ImageTask>& task) {
-  // The task can be cancelled at any time, including before it starts, so
-  // check the cancellable at multiple points
-  if (task->cancellable->is_cancelled()) return;
+// Because the cancellable is reset before each task, clear() needs to run
+// first. Otherwise, a task could be popped after cancel() and before clear().
+// This function would need to lock work_queue's mutex to avoid that.
+void ImageWorker::cancel_all() {
+  work_queue.clear();
+  cancellable->cancel();
+}
 
-  // TODO: Compare Pixbuf::create_from_file's speed with PixbufLoader
-  // TODO: Check if network-mounted or very large images can stall the thread
-  // TODO: Support animated images
+// Runs in a worker thread.
+void ImageWorker::process(const sigc::slot<void, std::shared_ptr<Task>>& slot,
+    const std::shared_ptr<Task>& task) {
+  try {
+    slot(task);
+  } catch (const Gio::Error& error) {
+    if (error.code() == Gio::Error::CANCELLED) return;
+    else throw;
+  }
+  {
+    Glib::Threads::Mutex::Lock lock(mutex);
+    result_queue.push(task);
+  }
+  dispatcher.emit();
+}
+
+// Runs in a worker thread.
+void ImageWorker::do_load(const std::shared_ptr<Task>& task) {
+  // TODO: Compare Pixbuf::create_from_file's speed with PixbufLoader.
+  // TODO: Check if network-mounted or very large images can stall the thread.
+  // TODO: Support animated images.
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(task->path);
-  if (task->cancellable->is_cancelled()) return;
+  if (cancellable->is_cancelled())
+    throw Gio::Error(Gio::Error::CANCELLED, "");
 
-  // Scale the pixbuf, preserving aspect ratio
+  // Scale the pixbuf, preserving aspect ratio.
   if (task->width_and_height) {
     int width = pixbuf->get_width();
     int height = pixbuf->get_height();
     double factor = (double)task->width_and_height / std::max(width, height);
     pixbuf = pixbuf->scale_simple(width*factor, height*factor,
         Gdk::INTERP_BILINEAR);
-    if (task->cancellable->is_cancelled()) return;
+    if (cancellable->is_cancelled())
+      throw Gio::Error(Gio::Error::CANCELLED, "");
   }
-
   task->pixbuf = pixbuf;
-  {
-    Glib::Threads::Mutex::Lock lock(mutex);
-    queue.push(task);
-  }
-  dispatcher.emit();
 }
 
-// Run in the main thread
+// Runs in the main thread.
 void ImageWorker::emit_finished() {
-  std::shared_ptr<ImageTask> task;
+  std::shared_ptr<Task> task;
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    task = queue.front();
-    queue.pop();
+    task = result_queue.front();
+    result_queue.pop();
   }
   signal_finished.emit(task);
 }

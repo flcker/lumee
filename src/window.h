@@ -35,7 +35,7 @@ class MainWindow : public Gtk::ApplicationWindow {
 
  private:
   void on_selection_changed();
-  void on_image_loaded(const std::shared_ptr<ImageTask>& task);
+  void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
   void open_file_chooser();
 
   Gtk::HeaderBar* header_bar;

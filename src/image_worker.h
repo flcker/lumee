@@ -17,51 +17,59 @@
 #ifndef LUMEE_IMAGE_WORKER_H
 #define LUMEE_IMAGE_WORKER_H
 
+#include "work_queue.h"
+
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/treeiter.h>
 #include <glibmm/dispatcher.h>
-#include <glibmm/threadpool.h>
 #include <glibmm/threads.h>
 
 #include <queue>
 
-/**
- * Task that can be processed by ImageWorker.
- */
-struct ImageTask {
-  const std::string path;
-  const int width_and_height;
-  // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
-  // there's a cleaner way to store this.
-  Gtk::TreeIter iter;
-
-  Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-
-  ImageTask(const std::string& path, const int width_and_height = 0,
-      Gtk::TreeIter iter = Gtk::TreeIter())
-      : path(path), width_and_height(width_and_height), iter(iter) {}
-};
-
-/**
- * Load images in a worker thread and return the results asynchronously.
- *
- * Connect to signal_finished to get notified when an image is done.
- */
+// Loads images in a thread and returns the results asynchronously.
 class ImageWorker {
  public:
-  ImageWorker();
-  void load(const std::shared_ptr<ImageTask>& task);
+  // A task that can be processed.
+  struct Task {
+    const std::string path;
+    const int width_and_height;
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
-  sigc::signal<void, std::shared_ptr<ImageTask>> signal_finished;
+    // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
+    // there's a cleaner way to store this.
+    Gtk::TreeIter iter;
+
+    Task(const std::string& path, const int width_and_height,
+        Gtk::TreeIter iter)
+        : path(path), width_and_height(width_and_height), iter(iter) {}
+  };
+
+  ImageWorker();
+
+  // Adds a loading task to the queue.
+  void load(const std::string& path, const int width_and_height = 0,
+      Gtk::TreeIter iter = Gtk::TreeIter());
+
+  // Cancels the running task and removes all queued tasks.
+  void cancel_all();
+
+  // Notifies when an image is done.
+  sigc::signal<void, std::shared_ptr<Task>> signal_finished;
 
  private:
-  void create_pixbuf(const std::shared_ptr<ImageTask>& task);
+  // Processes a slot and task, communicating the result to the main thread.
+  void process(const sigc::slot<void, std::shared_ptr<Task>>& slot,
+      const std::shared_ptr<Task>& task);
+
+  // Loads an image.
+  void do_load(const std::shared_ptr<Task>& task);
+
   void emit_finished();
 
-  Glib::ThreadPool pool;
+  WorkQueue work_queue;
+  Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
   Glib::Threads::Mutex mutex;
-  std::queue<std::shared_ptr<ImageTask>> queue;
+  std::queue<std::shared_ptr<Task>> result_queue;
   Glib::Dispatcher dispatcher;
 };
 

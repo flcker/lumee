@@ -14,12 +14,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "app.h"
+#include "application.h"
 
-// Support C++11 lambdas as sigc functors
+// Support C++11 lambdas as sigc functors.
 namespace sigc { SIGC_FUNCTORS_DEDUCE_RESULT_TYPE_WITH_DECLTYPE }
 
 int main(int argc, char* argv[]) {
-  Glib::RefPtr<LumeeApp> app = LumeeApp::create();
+  Glib::RefPtr<Application> app = Application::create();
   return app->run(argc, argv);
 }

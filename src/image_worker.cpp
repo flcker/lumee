@@ -68,7 +68,7 @@ void ImageWorker::do_load(const std::shared_ptr<Task>& task) {
   if (task->width_and_height) {
     int width = pixbuf->get_width();
     int height = pixbuf->get_height();
-    double factor = (double)task->width_and_height / std::max(width, height);
+    double factor = task->width_and_height / std::max<double>(width, height);
     pixbuf = pixbuf->scale_simple(width*factor, height*factor,
         Gdk::INTERP_BILINEAR);
     if (cancellable->is_cancelled())

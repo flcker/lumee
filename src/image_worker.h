@@ -34,11 +34,8 @@ class ImageWorker {
     const std::string path;
     const int width_and_height;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-
-    // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
-    // there's a cleaner way to store this.
-    Gtk::TreeIter iter;
-
+    Gtk::TreeIter iter;  // Unused by ImageWorker, but useful for the thumbnail
+                         // callback. Maybe there's a cleaner way to store it.
     Task(const std::string& path, const int width_and_height,
         Gtk::TreeIter iter)
         : path(path), width_and_height(width_and_height), iter(iter) {}
@@ -73,4 +70,4 @@ class ImageWorker {
   Glib::Dispatcher dispatcher;
 };
 
-#endif
+#endif  // LUMEE_IMAGE_WORKER_H

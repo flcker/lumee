@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "app.h"
+#include "application.h"
 
 #include <giomm/menu.h>
 #include <glibmm/i18n.h>
@@ -23,34 +23,35 @@
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/settings.h>
 
-LumeeApp::~LumeeApp() {
+Application::~Application() {
   delete main_window;
 }
 
-Glib::RefPtr<LumeeApp> LumeeApp::create() {
-  return Glib::RefPtr<LumeeApp>(new LumeeApp());
+// static
+Glib::RefPtr<Application> Application::create() {
+  return Glib::RefPtr<Application>(new Application());
 }
 
-LumeeApp::LumeeApp() : Gtk::Application("net.beyondboredom.Lumee",
+Application::Application() : Gtk::Application("net.beyondboredom.Lumee",
     Gio::APPLICATION_HANDLES_OPEN | Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
 
-void LumeeApp::on_startup() {
+void Application::on_startup() {
   Gtk::Application::on_startup();
 
-  add_action("about", sigc::mem_fun(*this, &LumeeApp::show_about_dialog));
-  add_action("quit", sigc::mem_fun(*this, &LumeeApp::hide_all_windows));
+  add_action("about", sigc::mem_fun(*this, &Application::show_about_dialog));
+  add_action("quit", sigc::mem_fun(*this, &Application::hide_all_windows));
 
   Gtk::Window::set_default_icon_name("emblem-photos");
   Glib::RefPtr<Gtk::Settings> settings = Gtk::Settings::get_default();
   settings->set_property("gtk-application-prefer-dark-theme", true);
 
-  // Load CSS
+  // Load CSS.
   Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
   css_provider->load_from_path(Glib::build_filename(DATA_DIR, "main.css"));
   Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
       css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-  // Load app menu and main window
+  // Load app menu and main window.
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
   builder->add_from_file(Glib::build_filename(DATA_DIR, "app_menu.ui"));
   set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
@@ -60,11 +61,7 @@ void LumeeApp::on_startup() {
   add_window(*main_window);
 }
 
-/**
- * Command line arguments: open the requested location (or default to one), and
- * present the main window.
- */
-int LumeeApp::on_command_line(
+int Application::on_command_line(
     const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line) {
   int argc;
   char** argv = command_line->get_arguments(argc);
@@ -80,14 +77,14 @@ int LumeeApp::on_command_line(
   return EXIT_SUCCESS;
 }
 
-void LumeeApp::on_open(const Gio::Application::type_vec_files& files,
+void Application::on_open(const Gio::Application::type_vec_files& files,
     const Glib::ustring& hint) {
   Gtk::Application::on_open(files, hint);
   main_window->open(files[0]);
 }
 
-void LumeeApp::show_about_dialog() {
-  // Keep only one instance and construct/destruct it as needed
+// Keeps only one instance of the dialog and constructs/destructs it as needed.
+void Application::show_about_dialog() {
   if (!about_dialog) {
     about_dialog = std::unique_ptr<Gtk::AboutDialog>(new Gtk::AboutDialog());
     about_dialog->set_title(_("About Lumee"));
@@ -98,13 +95,13 @@ void LumeeApp::show_about_dialog() {
     about_dialog->set_license_type(Gtk::LICENSE_GPL_3_0);
     about_dialog->set_modal();
     about_dialog->signal_response().connect([this](int)
-        { about_dialog.reset(); });   // Reset pointer to destroy the dialog
+        { about_dialog.reset(); });  // Reset pointer to destroy the dialog.
   }
   about_dialog->set_transient_for(*get_active_window());
   about_dialog->present();
 }
 
-void LumeeApp::hide_all_windows() {
+void Application::hide_all_windows() {
   for (Gtk::Window* window : get_windows())
     window->hide();
 }

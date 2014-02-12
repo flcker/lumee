@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "window.h"
+#include "main_window.h"
 
 #include <glibmm/convert.h>
 #include <glibmm/i18n.h>
@@ -41,32 +41,23 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   show_all_children();
 }
 
-/**
- * Open a folder.
- */
 void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
   image_list->open_folder(file);
   folder_path = file->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
 
-/**
- * Load an image based on the file list's selection.
- */
 void MainWindow::on_selection_changed() {
-  image_worker.cancel_all();  // Only one image should be loading at a time
+  image_worker.cancel_all();  // Only one image should be loading at a time.
   Gtk::TreeIter iter = list_view->get_selection()->get_selected();
-  if (!iter) {  // No selection
+  if (iter)
+    image_worker.load((*iter)[image_list->columns.path]);
+  else {  // No selection.
     image->clear();
     header_bar->set_subtitle("");
-    return;
   }
-  image_worker.load((*iter)[image_list->columns.path]);
 }
 
-/**
- * Display an image that finished loading.
- */
 void MainWindow::on_image_loaded(
     const std::shared_ptr<ImageWorker::Task>& task) {
   image->set(task->pixbuf);
@@ -75,9 +66,6 @@ void MainWindow::on_image_loaded(
   image_scroll->get_vadjustment()->set_value(0);
 }
 
-/**
- * Open a folder with a file chooser dialog.
- */
 void MainWindow::open_file_chooser() {
   Gtk::FileChooserDialog chooser(*this, _("Open Folder"),
       Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);

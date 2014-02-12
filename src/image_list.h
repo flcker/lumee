@@ -22,9 +22,7 @@
 #include <gtkmm/icontheme.h>
 #include <gtkmm/liststore.h>
 
-/**
- * A model that stores a list of image files with thumbnails.
- */
+// A model that stores a list of image files with thumbnails.
 class ImageList : public Gtk::ListStore {
  public:
   struct Columns : public Gtk::TreeModelColumnRecord {
@@ -38,7 +36,10 @@ class ImageList : public Gtk::ListStore {
   static const int THUMBNAIL_SIZE;
 
   ImageList();
+
+  // Opens a folder, replacing the current list with the folder's images.
   void open_folder(const Glib::RefPtr<Gio::File>& file);
+
   static Glib::RefPtr<ImageList> create();
 
   const Columns columns;
@@ -49,9 +50,10 @@ class ImageList : public Gtk::ListStore {
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;
-  // TODO: Listen for icon theme changes
+
+  // TODO: Listen for icon theme changes.
   const Glib::RefPtr<Gdk::Pixbuf> thumbnail_loading_icon =
       Gtk::IconTheme::get_default()->load_icon("image-loading", 48)->copy();
 };
 
-#endif
+#endif  // LUMEE_IMAGE_LIST_H

@@ -25,7 +25,7 @@
 const int ImageList::THUMBNAIL_SIZE = 96;
 
 ImageList::ImageList() : Gtk::ListStore() {
-  // Build list of supported image MIME types
+  // Build a list of supported image MIME types.
   for (Gdk::PixbufFormat format : Gdk::Pixbuf::get_formats()) {
     std::vector<Glib::ustring> mime_types = format.get_mime_types();
     supported_mime_types.insert(end(supported_mime_types), begin(mime_types),
@@ -36,11 +36,8 @@ ImageList::ImageList() : Gtk::ListStore() {
         &ImageList::on_thumbnail_loaded));
 }
 
-/**
- * Open a folder, replacing the current list with the folder's images.
- */
 void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
-  // TODO: Make this async
+  // TODO: Make this async.
   Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
       G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
@@ -64,6 +61,7 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
   }
 }
 
+// static
 Glib::RefPtr<ImageList> ImageList::create() {
   Glib::RefPtr<ImageList> model(new ImageList());
   model->set_column_types(model->columns);

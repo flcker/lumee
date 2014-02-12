@@ -14,24 +14,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LUMEE_APP_H
-#define LUMEE_APP_H
+#ifndef LUMEE_APPLICATION_H
+#define LUMEE_APPLICATION_H
 
-#include "window.h"
+#include "main_window.h"
 
 #include <gtkmm/aboutdialog.h>
 #include <gtkmm/application.h>
 
-class LumeeApp : public Gtk::Application {
+class Application : public Gtk::Application {
  public:
-  virtual ~LumeeApp();
-  static Glib::RefPtr<LumeeApp> create();
+  virtual ~Application();
+  static Glib::RefPtr<Application> create();
 
  protected:
-  LumeeApp();
+  Application();
   virtual void on_startup();
+
+  // Opens the requested location (or defaults to one) and presents the main
+  // window.
   virtual int on_command_line(
       const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line);
+
   virtual void on_open(const Gio::Application::type_vec_files& files,
       const Glib::ustring& hint);
 
@@ -43,4 +47,4 @@ class LumeeApp : public Gtk::Application {
   std::unique_ptr<Gtk::AboutDialog> about_dialog;
 };
 
-#endif
+#endif  // LUMEE_APPLICATION_H

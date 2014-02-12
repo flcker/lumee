@@ -14,8 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LUMEE_WINDOW_H
-#define LUMEE_WINDOW_H
+#ifndef LUMEE_MAIN_WINDOW_H
+#define LUMEE_MAIN_WINDOW_H
 
 #include "image_list.h"
 #include "image_worker.h"
@@ -31,11 +31,18 @@ class MainWindow : public Gtk::ApplicationWindow {
  public:
   MainWindow(BaseObjectType* cobject,
       const Glib::RefPtr<Gtk::Builder>& builder);
+
+  // Opens a folder.
   void open(const Glib::RefPtr<Gio::File>& file);
 
  private:
+  // Loads an image based on the file list's selection.
   void on_selection_changed();
+
+  // Displays an image that has finished loading.
   void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
+
+  // Opens a folder with a file chooser dialog.
   void open_file_chooser();
 
   Gtk::HeaderBar* header_bar;
@@ -45,9 +52,7 @@ class MainWindow : public Gtk::ApplicationWindow {
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;
-
   ImageWorker image_worker;
-  Glib::RefPtr<Gio::Cancellable> image_cancellable;
 };
 
-#endif
+#endif  // LUMEE_MAIN_WINDOW_H

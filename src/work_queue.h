@@ -49,4 +49,4 @@ class WorkQueue {
   bool exiting = false;
 };
 
-#endif
+#endif  // LUMEE_WORK_QUEUE_H

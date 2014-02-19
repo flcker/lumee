@@ -40,6 +40,9 @@ class Application : public Gtk::Application {
       const Glib::ustring& hint);
 
  private:
+  // Loads the CSS and UI at startup.
+  void load_ui();
+
   void show_about_dialog();
   void hide_all_windows();
 

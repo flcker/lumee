@@ -25,10 +25,11 @@ MainWindow::MainWindow(BaseObjectType* cobject,
     : Gtk::ApplicationWindow(cobject) {
   builder->get_widget("header-bar", header_bar);
   builder->get_widget("list-view", list_view);
-  builder->get_widget("image", image);
-  builder->get_widget("image-scroll", image_scroll);
+  builder->get_widget_derived("image-view", image_view);
 
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
+  zoom_action = add_action_radio_string("zoom", sigc::mem_fun(*this,
+        &MainWindow::zoom), "best-fit");
 
   list_view->set_model(image_list);
   list_view->append_column("", image_list->columns.thumbnail);
@@ -53,17 +54,18 @@ void MainWindow::on_selection_changed() {
   if (iter)
     image_worker.load((*iter)[image_list->columns.path]);
   else {  // No selection.
-    image->clear();
+    image_view->clear();
     header_bar->set_subtitle("");
   }
 }
 
 void MainWindow::on_image_loaded(
     const std::shared_ptr<ImageWorker::Task>& task) {
-  image->set(task->pixbuf);
+  image_view->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
-  image_scroll->get_hadjustment()->set_value(0);
-  image_scroll->get_vadjustment()->set_value(0);
+  // Reset scroll position.
+  image_view->get_hadjustment()->set_value(0);
+  image_view->get_vadjustment()->set_value(0);
 }
 
 void MainWindow::open_file_chooser() {
@@ -74,4 +76,24 @@ void MainWindow::open_file_chooser() {
   chooser.set_current_folder(folder_path);
   if (chooser.run() == Gtk::RESPONSE_ACCEPT)
     open(Gio::File::create_for_path(chooser.get_filename()));
+}
+
+void MainWindow::zoom(const Glib::ustring& mode) {
+  if (mode == "best-fit")
+    image_view->zoom(image_view->ZOOM_BEST_FIT);
+  else if (mode == "original")
+    image_view->zoom(1.0);
+  else if (mode == "in")
+    image_view->zoom(image_view->zoom() * 1.05);
+  else if (mode == "out")
+    image_view->zoom(image_view->zoom() / 1.05);
+
+  // Changing the state first to an empty string forces the widgets to update.
+  // Otherwise, a toggle button could be de-toggled by being activated twice in
+  // a row.
+  zoom_action->change_state(Glib::ustring());
+  if (mode != "in" && mode != "out")
+    zoom_action->change_state(mode);
+  else if (image_view->zoom() == 1.0)
+    zoom_action->change_state(Glib::ustring("original"));
 }

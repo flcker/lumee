@@ -18,13 +18,12 @@
 #define LUMEE_MAIN_WINDOW_H
 
 #include "image_list.h"
+#include "image_view.h"
 #include "image_worker.h"
 
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/headerbar.h>
-#include <gtkmm/image.h>
-#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
@@ -45,10 +44,13 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Opens a folder with a file chooser dialog.
   void open_file_chooser();
 
+  // Changes the image's zoom.
+  void zoom(const Glib::ustring& mode);
+
   Gtk::HeaderBar* header_bar;
   Gtk::TreeView* list_view;
-  Gtk::Image* image;
-  Gtk::ScrolledWindow* image_scroll;
+  ImageView* image_view;
+  Glib::RefPtr<Gio::SimpleAction> zoom_action;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;

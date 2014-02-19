@@ -1,4 +1,20 @@
 <interface>
+  <menu id="zoom-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Zoom _In</attribute>
+        <attribute name="action">win.zoom</attribute>
+        <attribute name="target">in</attribute>
+        <attribute name="accel">equal</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Zoom _Out</attribute>
+        <attribute name="action">win.zoom</attribute>
+        <attribute name="target">out</attribute>
+        <attribute name="accel">minus</attribute>
+      </item>
+    </section>
+  </menu>
   <object id="main-window" class="GtkApplicationWindow">
     <property name="title">Lumee</property>
     <property name="default-width">800</property>
@@ -19,6 +35,48 @@
             </child>
           </object>
         </child>
+        <child>
+          <object id="zoom-buttons" class="GtkBox">
+            <style>
+              <class name="linked"/>
+            </style>
+            <child>
+              <object id="zoom-best-fit" class="GtkToggleButton">
+                <property name="action-name">win.zoom</property>
+                <property name="action-target">"best-fit"</property>
+                <property name="tooltip-text" translatable="yes">Zoom to best fit</property>
+                <child>
+                  <object id="zoom-best-fit-image" class="GtkImage">
+                    <property name="icon-name">zoom-fit-best-symbolic</property>
+                    <property name="icon-size">1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object id="zoom-original" class="GtkToggleButton">
+                <property name="action-name">win.zoom</property>
+                <property name="action-target">"original"</property>
+                <property name="tooltip-text" translatable="yes">Zoom to original size</property>
+                <child>
+                  <object id="zoom-original-image" class="GtkImage">
+                    <property name="icon-name">zoom-original-symbolic</property>
+                    <property name="icon-size">1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object id="zoom-menu-button" class="GtkMenuButton">
+                <property name="menu-model">zoom-menu</property>
+                <property name="tooltip-text" translatable="yes">Zoom menu</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
       </object>
     </child>
     <child>
@@ -31,6 +89,7 @@
                 <property name="name">file-list</property>
                 <property name="vexpand">true</property>
                 <property name="headers-visible">false</property>
+                <property name="enable-search">false</property>
                 <child internal-child="selection">
                   <object id="list-selection" class="GtkTreeSelection">
                     <property name="mode">GTK_SELECTION_BROWSE</property>
@@ -41,7 +100,7 @@
           </object>
         </child>
         <child>
-          <object id="image-scroll" class="GtkScrolledWindow">
+          <object id="image-view" class="GtkScrolledWindow">
             <child>
               <object id="image" class="GtkImage">
                 <property name="hexpand">true</property>

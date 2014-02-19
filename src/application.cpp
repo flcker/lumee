@@ -42,23 +42,21 @@ void Application::on_startup() {
   add_action("quit", sigc::mem_fun(*this, &Application::hide_all_windows));
 
   Gtk::Window::set_default_icon_name("emblem-photos");
-  Glib::RefPtr<Gtk::Settings> settings = Gtk::Settings::get_default();
-  settings->set_property("gtk-application-prefer-dark-theme", true);
+  Gtk::Settings::get_default()->
+      property_gtk_application_prefer_dark_theme() = true;
+  load_ui();
 
-  // Load CSS.
-  Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
-  css_provider->load_from_path(Glib::build_filename(DATA_DIR, "main.css"));
-  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
-      css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-  // Load app menu and main window.
-  Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
-  builder->add_from_file(Glib::build_filename(DATA_DIR, "app_menu.ui"));
-  set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
-          "app-menu")));
-  builder->add_from_file(Glib::build_filename(DATA_DIR, "main.ui"));
-  builder->get_widget_derived("main-window", main_window);
-  add_window(*main_window);
+  // These accelerators don't have a corresponding menu item. The keyboard
+  // shortcut isn't documented in the UI, which is a usability issue.
+  add_accelerator("<Primary>o", "win.open");
+  add_accelerator("bracketleft", "win.zoom", g_variant_new_string("best-fit"));
+  add_accelerator("bracketright", "win.zoom", g_variant_new_string(
+        "original"));
+  // These have a menu item, but it belongs to a Gtk::MenuButton, which doesn't
+  // automatically add the accelerators to the application. They need to be
+  // updated in two places if changed.
+  add_accelerator("equal", "win.zoom", g_variant_new_string("in"));
+  add_accelerator("minus", "win.zoom", g_variant_new_string("out"));
 }
 
 int Application::on_command_line(
@@ -81,6 +79,21 @@ void Application::on_open(const Gio::Application::type_vec_files& files,
     const Glib::ustring& hint) {
   Gtk::Application::on_open(files, hint);
   main_window->open(files[0]);
+}
+
+void Application::load_ui() {
+  Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
+  css_provider->load_from_path(Glib::build_filename(DATA_DIR, "main.css"));
+  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
+      css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+  Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
+  builder->add_from_file(Glib::build_filename(DATA_DIR, "app_menu.ui"));
+  set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
+          "app-menu")));
+  builder->add_from_file(Glib::build_filename(DATA_DIR, "main.ui"));
+  builder->get_widget_derived("main-window", main_window);
+  add_window(*main_window);
 }
 
 // Keeps only one instance of the dialog and constructs/destructs it as needed.

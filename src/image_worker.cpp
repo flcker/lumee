@@ -15,6 +15,7 @@
  */
 
 #include "image_worker.h"
+#include "utils.h"
 
 #include <giomm/error.h>
 
@@ -24,11 +25,11 @@ ImageWorker::ImageWorker() {
   dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
 }
 
-void ImageWorker::load(const std::string& path, const int width_and_height,
+void ImageWorker::load(const std::string& path, const int scale_size,
     Gtk::TreeIter iter) {
   work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
         sigc::mem_fun(*this, &ImageWorker::do_load),
-        std::make_shared<Task>(path, width_and_height, iter)));
+        std::make_shared<Task>(path, scale_size, iter)));
 }
 
 // Because the cancellable is reset before each task, clear() needs to run
@@ -64,13 +65,11 @@ void ImageWorker::do_load(const std::shared_ptr<Task>& task) {
   if (cancellable->is_cancelled())
     throw Gio::Error(Gio::Error::CANCELLED, "");
 
-  // Scale the pixbuf, preserving aspect ratio.
-  if (task->width_and_height) {
-    int width = pixbuf->get_width();
-    int height = pixbuf->get_height();
-    double factor = task->width_and_height / std::max<double>(width, height);
-    pixbuf = pixbuf->scale_simple(width*factor, height*factor,
-        Gdk::INTERP_BILINEAR);
+  if (task->scale_size) {
+    double factor = scale_best_fit(task->scale_size, task->scale_size,
+        pixbuf->get_width(), pixbuf->get_height());
+    pixbuf = pixbuf->scale_simple(std::round(pixbuf->get_width() * factor),
+        std::round(pixbuf->get_height() * factor), Gdk::INTERP_BILINEAR);
     if (cancellable->is_cancelled())
       throw Gio::Error(Gio::Error::CANCELLED, "");
   }

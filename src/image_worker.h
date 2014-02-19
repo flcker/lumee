@@ -31,20 +31,27 @@ class ImageWorker {
  public:
   // A task that can be processed.
   struct Task {
+    // Path to the image file.
     const std::string path;
-    const int width_and_height;
+
+    // Size to scale the image to, if any (assumes an equal width and height).
+    const int scale_size;
+
+    // Will contain the result of the task.
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-    Gtk::TreeIter iter;  // Unused by ImageWorker, but useful for the thumbnail
-                         // callback. Maybe there's a cleaner way to store it.
-    Task(const std::string& path, const int width_and_height,
-        Gtk::TreeIter iter)
-        : path(path), width_and_height(width_and_height), iter(iter) {}
+
+    // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
+    // there's a cleaner way to store this.
+    Gtk::TreeIter iter;
+
+    Task(const std::string& path, const int scale_size, Gtk::TreeIter iter)
+        : path(path), scale_size(scale_size), iter(iter) {}
   };
 
   ImageWorker();
 
   // Adds a loading task to the queue.
-  void load(const std::string& path, const int width_and_height = 0,
+  void load(const std::string& path, const int scale_size = 0,
       Gtk::TreeIter iter = Gtk::TreeIter());
 
   // Cancels the running task and removes all queued tasks.

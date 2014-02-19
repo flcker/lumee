@@ -75,7 +75,7 @@ void MainWindow::open_file_chooser() {
   chooser.add_button(_("_Open"), Gtk::RESPONSE_ACCEPT);
   chooser.set_current_folder(folder_path);
   if (chooser.run() == Gtk::RESPONSE_ACCEPT)
-    open(Gio::File::create_for_path(chooser.get_filename()));
+    open(chooser.get_file());
 }
 
 void MainWindow::zoom(const Glib::ustring& mode) {

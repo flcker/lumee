@@ -44,10 +44,11 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Opens a folder with a file chooser dialog.
   void open_file_chooser();
 
-  // Changes the image's zoom.
+  // Modifies the image's zoom.
   void zoom(const Glib::ustring& mode);
 
   Gtk::HeaderBar* header_bar;
+  Gtk::Label* zoom_label;
   Gtk::TreeView* list_view;
   ImageView* image_view;
   Glib::RefPtr<Gio::SimpleAction> zoom_action;

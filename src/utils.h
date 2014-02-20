@@ -17,9 +17,14 @@
 #ifndef LUMEE_UTILS_H
 #define LUMEE_UTILS_H
 
+#include <string>
+
 // Returns the scale factor needed to fit the source area into the destination
 // area with aspect ratio preserved.
 double scale_best_fit(int dest_width, int dest_height, int src_width,
     int src_height);
+
+// Converts a decimal to its percentage (for example, 0.12 becomes "12%").
+std::string to_percentage(double decimal);
 
 #endif

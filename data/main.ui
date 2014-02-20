@@ -68,8 +68,14 @@
             </child>
             <child>
               <object id="zoom-menu-button" class="GtkMenuButton">
+                <property name="name">zoom-menu-button</property>
                 <property name="menu-model">zoom-menu</property>
-                <property name="tooltip-text" translatable="yes">Zoom menu</property>
+                <property name="tooltip-text" translatable="yes">Adjust the zoom level</property>
+                <child>
+                  <object id="zoom-label" class="GtkLabel">
+                    <property name="width-chars">5</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

@@ -15,6 +15,7 @@
  */
 
 #include "main_window.h"
+#include "utils.h"
 
 #include <glibmm/convert.h>
 #include <glibmm/i18n.h>
@@ -24,6 +25,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject) {
   builder->get_widget("header-bar", header_bar);
+  builder->get_widget("zoom-label", zoom_label);
   builder->get_widget("list-view", list_view);
   builder->get_widget_derived("image-view", image_view);
 
@@ -63,6 +65,7 @@ void MainWindow::on_image_loaded(
     const std::shared_ptr<ImageWorker::Task>& task) {
   image_view->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
+  zoom_label->set_text(to_percentage(image_view->zoom()));
   // Reset scroll position.
   image_view->get_hadjustment()->set_value(0);
   image_view->get_vadjustment()->set_value(0);
@@ -84,9 +87,10 @@ void MainWindow::zoom(const Glib::ustring& mode) {
   else if (mode == "original")
     image_view->zoom(1.0);
   else if (mode == "in")
-    image_view->zoom(image_view->zoom() * 1.05);
+    image_view->zoom(image_view->zoom() * 1.1);
   else if (mode == "out")
-    image_view->zoom(image_view->zoom() / 1.05);
+    image_view->zoom(image_view->zoom() / 1.1);
+  zoom_label->set_text(to_percentage(image_view->zoom()));
 
   // Changing the state first to an empty string forces the widgets to update.
   // Otherwise, a toggle button could be de-toggled by being activated twice in

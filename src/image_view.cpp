@@ -37,6 +37,8 @@ void ImageView::clear() {
 }
 
 void ImageView::show_image() {
+  if (!pixbuf)
+    return;
   if (zoom_mode == ZOOM_BEST_FIT)
     zoom_factor = scale_best_fit(get_allocated_width(), get_allocated_height(),
         pixbuf->get_width(), pixbuf->get_height());

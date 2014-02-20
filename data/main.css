@@ -1,3 +1,7 @@
+#zoom-menu-button {
+    padding: 3px 4px 4px;
+}
+
 #file-list {
     -GtkTreeView-vertical-separator: 8;
 }

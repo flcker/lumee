@@ -16,7 +16,7 @@
 
 #include "utils.h"
 
-#include <algorithm>
+#include <cmath>
 #include <sstream>
 
 double scale_best_fit(int dest_width, int dest_height, int src_width,
@@ -33,8 +33,7 @@ double scale_best_fit(int dest_width, int dest_height, int src_width,
       w = std::round(src_width * h / src_height);
     }
   }
-  return std::max(static_cast<double>(w) / src_width, static_cast<double>(h) /
-      src_height);
+  return (double(w) / src_width + double(h) / src_height) / 2;
 }
 
 std::string to_percentage(double decimal) {

@@ -38,7 +38,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Loads an image based on the file list's selection.
   void on_selection_changed();
 
-  // Displays an image that has finished loading.
+  // Shows an image that has finished loading.
   void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 
   // Opens a folder with a file chooser dialog.
@@ -46,6 +46,10 @@ class MainWindow : public Gtk::ApplicationWindow {
 
   // Modifies the image's zoom.
   void zoom(const Glib::ustring& mode);
+
+  // Enables or disables zooming. Zooming should be disabled if no image is
+  // being shown.
+  void enable_zoom(bool enabled = true);
 
   Gtk::HeaderBar* header_bar;
   Gtk::Label* zoom_label;

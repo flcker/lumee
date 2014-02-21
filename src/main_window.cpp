@@ -32,6 +32,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
   zoom_action = add_action_radio_string("zoom", sigc::mem_fun(*this,
         &MainWindow::zoom), "best-fit");
+  enable_zoom(false);
 
   list_view->set_model(image_list);
   list_view->append_column("", image_list->columns.thumbnail);
@@ -58,6 +59,7 @@ void MainWindow::on_selection_changed() {
   else {  // No selection.
     image_view->clear();
     header_bar->set_subtitle("");
+    enable_zoom(false);
   }
 }
 
@@ -65,7 +67,7 @@ void MainWindow::on_image_loaded(
     const std::shared_ptr<ImageWorker::Task>& task) {
   image_view->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
-  zoom_label->set_text(to_percentage(image_view->zoom()));
+  enable_zoom();
   // Reset scroll position.
   image_view->get_hadjustment()->set_value(0);
   image_view->get_vadjustment()->set_value(0);
@@ -100,4 +102,16 @@ void MainWindow::zoom(const Glib::ustring& mode) {
     zoom_action->change_state(mode);
   else if (image_view->zoom() == 1.0)
     zoom_action->change_state(Glib::ustring("original"));
+}
+
+void MainWindow::enable_zoom(bool enabled) {
+  if (enabled) {
+    zoom_label->get_parent()->set_sensitive();
+    zoom_label->set_text(to_percentage(image_view->zoom()));
+    zoom_action->set_enabled();
+  } else {
+    zoom_label->get_parent()->set_sensitive(false);
+    zoom_label->set_text("100%");
+    zoom_action->set_enabled(false);
+  }
 }

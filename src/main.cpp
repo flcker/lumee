@@ -20,6 +20,5 @@
 namespace sigc { SIGC_FUNCTORS_DEDUCE_RESULT_TYPE_WITH_DECLTYPE }
 
 int main(int argc, char* argv[]) {
-  Glib::RefPtr<Application> app = Application::create();
-  return app->run(argc, argv);
+  return Application::create()->run(argc, argv);
 }

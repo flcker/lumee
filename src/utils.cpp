@@ -16,8 +16,12 @@
 
 #include "utils.h"
 
+#include <glibmm/miscutils.h>
+
+#include <climits>
 #include <cmath>
 #include <sstream>
+#include <unistd.h>
 
 double scale_best_fit(int dest_width, int dest_height, int src_width,
     int src_height) {
@@ -40,4 +44,18 @@ std::string to_percentage(double decimal) {
   std::stringstream s;
   s << std::round(decimal * 100) << "%";
   return s.str();
+}
+
+// Checks the location of the current executable to support being run from the
+// build directory. Doing this isn't portable and may need changes for other
+// operating systems.
+std::string get_data_dir() {
+  char exe_file[PATH_MAX];
+  ssize_t size = readlink("/proc/self/exe", exe_file, PATH_MAX);
+  if (size != -1) {
+    std::string exe_dir = Glib::path_get_dirname(std::string(exe_file, size));
+    if (exe_dir != BINDIR)
+      return Glib::build_filename(exe_dir, "data");
+  }
+  return PKGDATADIR;
 }

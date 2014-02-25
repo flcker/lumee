@@ -32,8 +32,10 @@ Glib::RefPtr<Application> Application::create() {
   return Glib::RefPtr<Application>(new Application());
 }
 
-Application::Application() : Gtk::Application("net.beyondboredom.Lumee",
-    Gio::APPLICATION_HANDLES_OPEN | Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
+Application::Application()
+    : Gtk::Application("net.beyondboredom.Lumee",
+        Gio::APPLICATION_HANDLES_OPEN |
+        Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
 
 void Application::on_startup() {
   Gtk::Application::on_startup();
@@ -83,15 +85,15 @@ void Application::on_open(const Gio::Application::type_vec_files& files,
 
 void Application::load_ui() {
   Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
-  css_provider->load_from_path(Glib::build_filename(DATA_DIR, "main.css"));
+  css_provider->load_from_path(Glib::build_filename(data_dir, "main.css"));
   Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
       css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
-  builder->add_from_file(Glib::build_filename(DATA_DIR, "app_menu.ui"));
+  builder->add_from_file(Glib::build_filename(data_dir, "app_menu.ui"));
   set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
           "app-menu")));
-  builder->add_from_file(Glib::build_filename(DATA_DIR, "main.ui"));
+  builder->add_from_file(Glib::build_filename(data_dir, "main.ui"));
   builder->get_widget_derived("main-window", main_window);
   add_window(*main_window);
 }
@@ -100,10 +102,11 @@ void Application::load_ui() {
 void Application::show_about_dialog() {
   if (!about_dialog) {
     about_dialog = std::unique_ptr<Gtk::AboutDialog>(new Gtk::AboutDialog());
-    about_dialog->set_title(_("About Lumee"));
     about_dialog->set_logo_icon_name("emblem-photos");
-    about_dialog->set_program_name("Lumee");
+    about_dialog->set_program_name(PACKAGE_NAME);
+    about_dialog->set_version(PACKAGE_VERSION);
     about_dialog->set_comments(_("A folder-based image viewer."));
+    about_dialog->set_website(PACKAGE_URL);
     about_dialog->set_copyright("Copyright © 2014 Brian Marshall");
     about_dialog->set_license_type(Gtk::LICENSE_GPL_3_0);
     about_dialog->set_modal();

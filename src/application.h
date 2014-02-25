@@ -18,6 +18,7 @@
 #define LUMEE_APPLICATION_H
 
 #include "main_window.h"
+#include "utils.h"
 
 #include <gtkmm/aboutdialog.h>
 #include <gtkmm/application.h>
@@ -46,6 +47,7 @@ class Application : public Gtk::Application {
   void show_about_dialog();
   void hide_all_windows();
 
+  const std::string data_dir = get_data_dir();
   MainWindow* main_window;
   std::unique_ptr<Gtk::AboutDialog> about_dialog;
 };

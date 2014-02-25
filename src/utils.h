@@ -27,4 +27,7 @@ double scale_best_fit(int dest_width, int dest_height, int src_width,
 // Converts a decimal to its percentage (for example, 0.12 becomes "12%").
 std::string to_percentage(double decimal);
 
+// Returns a path to the data directory.
+std::string get_data_dir();
+
 #endif

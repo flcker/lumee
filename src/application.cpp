@@ -23,6 +23,8 @@
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/settings.h>
 
+#include <iostream>
+
 Application::~Application() {
   delete main_window;
 }
@@ -46,7 +48,12 @@ void Application::on_startup() {
   Gtk::Window::set_default_icon_name("emblem-photos");
   Gtk::Settings::get_default()->
       property_gtk_application_prefer_dark_theme() = true;
-  load_ui();
+  try {
+    load_ui();
+  } catch (const Glib::Error& error) {
+    std::cerr << "Error loading UI: " << error.what() << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   // These accelerators don't have a corresponding menu item. The keyboard
   // shortcut isn't documented in the UI, which is a usability issue.
@@ -77,18 +84,12 @@ int Application::on_command_line(
   return EXIT_SUCCESS;
 }
 
-void Application::on_open(const Gio::Application::type_vec_files& files,
-    const Glib::ustring& hint) {
-  Gtk::Application::on_open(files, hint);
+void Application::on_open(const type_vec_files& files,
+    const Glib::ustring& /*hint*/) {
   main_window->open(files[0]);
 }
 
 void Application::load_ui() {
-  Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
-  css_provider->load_from_path(Glib::build_filename(data_dir, "main.css"));
-  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
-      css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
   builder->add_from_file(Glib::build_filename(data_dir, "app_menu.ui"));
   set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
@@ -96,6 +97,11 @@ void Application::load_ui() {
   builder->add_from_file(Glib::build_filename(data_dir, "main.ui"));
   builder->get_widget_derived("main-window", main_window);
   add_window(*main_window);
+
+  Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
+  css_provider->load_from_path(Glib::build_filename(data_dir, "main.css"));
+  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
+      css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 // Keeps only one instance of the dialog and constructs/destructs it as needed.
@@ -110,7 +116,7 @@ void Application::show_about_dialog() {
     about_dialog->set_copyright("Copyright © 2014 Brian Marshall");
     about_dialog->set_license_type(Gtk::LICENSE_GPL_3_0);
     about_dialog->set_modal();
-    about_dialog->signal_response().connect([this](int)
+    about_dialog->signal_response().connect([this](int /*response_id*/)
         { about_dialog.reset(); });  // Reset pointer to destroy the dialog.
   }
   about_dialog->set_transient_for(*get_active_window());

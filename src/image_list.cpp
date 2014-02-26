@@ -24,7 +24,7 @@
 
 const int ImageList::THUMBNAIL_SIZE = 96;
 
-ImageList::ImageList() : Gtk::ListStore() {
+ImageList::ImageList() {
   // Build a list of supported image MIME types.
   for (Gdk::PixbufFormat format : Gdk::Pixbuf::get_formats()) {
     std::vector<Glib::ustring> mime_types = format.get_mime_types();

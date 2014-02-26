@@ -31,14 +31,9 @@ class Application : public Gtk::Application {
  protected:
   Application();
   virtual void on_startup();
-
-  // Opens the requested location (or defaults to one) and presents the main
-  // window.
   virtual int on_command_line(
       const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line);
-
-  virtual void on_open(const Gio::Application::type_vec_files& files,
-      const Glib::ustring& hint);
+  virtual void on_open(const type_vec_files& files, const Glib::ustring& hint);
 
  private:
   // Loads the CSS and UI at startup.

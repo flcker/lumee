@@ -32,6 +32,12 @@ class ImageView : public Gtk::ScrolledWindow {
     ZOOM_FREE       // Zoom by an arbitrary factor.
   };
 
+  // List of preset zoom factors.
+  static const std::vector<double> ZOOM_STEPS;
+
+  // Multiplier for the zoom factor when not using zoom steps.
+  static const double ZOOM_MULTIPLIER;
+
   // Minimum and maximum zoom factors.
   static const double ZOOM_MIN;
   static const double ZOOM_MAX;
@@ -47,11 +53,15 @@ class ImageView : public Gtk::ScrolledWindow {
     show_image();
   }
   void zoom(double factor) {
-    zoom_mode = ZOOM_FREE;
     zoom_factor = factor;
-    show_image();
+    zoom(ZOOM_FREE);
   }
   double zoom() const { return zoom_factor; }
+
+  // Zooms in or out. When 'step' is true, the zoom factor snaps to the next
+  // preset value.
+  void zoom_in(bool step = false);
+  void zoom_out(bool step = false);
 
  private:
   // Shows the image based on current zoom settings.

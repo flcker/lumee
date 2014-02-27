@@ -17,8 +17,11 @@
 #include "image_view.h"
 #include "utils.h"
 
-const double ImageView::ZOOM_MIN = 0.15;
-const double ImageView::ZOOM_MAX = 3.0;
+const std::vector<double> ImageView::ZOOM_STEPS = {0.15, 1/3.0, 0.5, 2/3.0,
+    1.0, 1.5, 2.0, 2.5, 3.0};
+const double ImageView::ZOOM_MULTIPLIER = 1.1;
+const double ImageView::ZOOM_MIN = ZOOM_STEPS.front();
+const double ImageView::ZOOM_MAX = ZOOM_STEPS.back();
 
 ImageView::ImageView(BaseObjectType* cobject,
     const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::ScrolledWindow(cobject) {
@@ -34,6 +37,24 @@ void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
 void ImageView::clear() {
   pixbuf.reset();
   image->clear();
+}
+
+void ImageView::zoom_in(bool step) {
+  if (step) {
+    auto iter = std::find_if(ZOOM_STEPS.begin(), ZOOM_STEPS.end(),
+        [this](double x) { return x > zoom_factor; });
+    zoom(iter != ZOOM_STEPS.end() ? *iter : ZOOM_MAX);
+  } else
+    zoom(zoom_factor * ZOOM_MULTIPLIER);
+}
+
+void ImageView::zoom_out(bool step) {
+  if (step) {
+    auto iter = std::find_if(ZOOM_STEPS.rbegin(), ZOOM_STEPS.rend(),
+        [this](double x) { return x < zoom_factor; });
+    zoom(iter != ZOOM_STEPS.rend() ? *iter : ZOOM_MIN);
+  } else
+    zoom(zoom_factor / ZOOM_MULTIPLIER);
 }
 
 void ImageView::show_image() {

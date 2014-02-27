@@ -4,14 +4,14 @@
       <item>
         <attribute name="label" translatable="yes">Zoom _In</attribute>
         <attribute name="action">win.zoom</attribute>
-        <attribute name="target">in</attribute>
-        <attribute name="accel">equal</attribute>
+        <attribute name="target">in::step</attribute>
+        <attribute name="accel">&lt;Primary&gt;equal</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Zoom _Out</attribute>
         <attribute name="action">win.zoom</attribute>
-        <attribute name="target">out</attribute>
-        <attribute name="accel">minus</attribute>
+        <attribute name="target">out::step</attribute>
+        <attribute name="accel">&lt;Primary&gt;minus</attribute>
       </item>
     </section>
   </menu>

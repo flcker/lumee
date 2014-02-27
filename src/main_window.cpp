@@ -88,17 +88,16 @@ void MainWindow::zoom(const Glib::ustring& mode) {
     image_view->zoom(image_view->ZOOM_BEST_FIT);
   else if (mode == "original")
     image_view->zoom(1.0);
-  else if (mode == "in")
-    image_view->zoom(image_view->zoom() * 1.1);
-  else if (mode == "out")
-    image_view->zoom(image_view->zoom() / 1.1);
+  else if (mode == "in" || mode == "in::step")
+    image_view->zoom_in(mode == "in::step");
+  else if (mode == "out" || mode == "out::step")
+    image_view->zoom_out(mode == "out::step");
   zoom_label->set_text(to_percentage(image_view->zoom()));
 
   // Changing the state first to an empty string forces the widgets to update.
-  // Otherwise, a toggle button could be de-toggled by being activated twice in
-  // a row.
+  // Otherwise, a button could be de-toggled by being activated twice in a row.
   zoom_action->change_state(Glib::ustring());
-  if (mode != "in" && mode != "out")
+  if (mode == "best-fit" || mode == "original")
     zoom_action->change_state(mode);
   else if (image_view->zoom() == 1.0)
     zoom_action->change_state(Glib::ustring("original"));

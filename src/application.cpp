@@ -55,17 +55,19 @@ void Application::on_startup() {
     exit(EXIT_FAILURE);
   }
 
-  // These accelerators don't have a corresponding menu item. The keyboard
-  // shortcut isn't documented in the UI, which is a usability issue.
+  // Some of these accelerators aren't shown in the UI with a menu item.
+  // Accelerators that do have a menu item may be duplicated here because they
+  // aren't automatically added.
   add_accelerator("<Primary>o", "win.open");
   add_accelerator("bracketleft", "win.zoom", g_variant_new_string("best-fit"));
   add_accelerator("bracketright", "win.zoom", g_variant_new_string(
         "original"));
-  // These have a menu item, but it belongs to a Gtk::MenuButton, which doesn't
-  // automatically add the accelerators to the application. They need to be
-  // updated in two places if changed.
   add_accelerator("equal", "win.zoom", g_variant_new_string("in"));
   add_accelerator("minus", "win.zoom", g_variant_new_string("out"));
+  add_accelerator("<Primary>equal", "win.zoom", g_variant_new_string(
+        "in::step"));
+  add_accelerator("<Primary>minus", "win.zoom", g_variant_new_string(
+        "out::step"));
 }
 
 int Application::on_command_line(

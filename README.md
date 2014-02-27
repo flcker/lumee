@@ -6,7 +6,7 @@ UI. It's still in early development.
 
 Lumee's main requirement is gtkmm 3.10 or newer. To build from source, you need
 a C++ compiler and gtkmm headers (for example, on Fedora: `yum install gcc-c++
-gtkmm30-devel`). Then, use the following commands in the source directory:
+gtkmm30-devel`). Then, use the following commands:
 
     $ autoreconf -i
     $ ./configure

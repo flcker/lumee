@@ -46,9 +46,9 @@ std::string to_percentage(double decimal) {
   return s.str();
 }
 
-// Checks the location of the current executable to support being run from the
-// build directory. Doing this isn't portable and may need changes for other
-// operating systems.
+// Checks the location of the current executable, in order to support being run
+// from the build directory. Doing this isn't portable and may need changes for
+// other operating systems.
 std::string get_data_dir() {
   char exe_file[PATH_MAX];
   ssize_t size = readlink("/proc/self/exe", exe_file, PATH_MAX);

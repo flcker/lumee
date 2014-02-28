@@ -13,8 +13,20 @@
         <attribute name="target">out::step</attribute>
         <attribute name="accel">&lt;Primary&gt;minus</attribute>
       </item>
+      <item>
+        <attribute name="label" translatable="yes">_Normal Size</attribute>
+        <attribute name="action">win.zoom</attribute>
+        <attribute name="target">normal</attribute>
+        <attribute name="accel">&lt;Primary&gt;0</attribute>
+      </item>
     </section>
     <section>
+      <item>
+        <attribute name="label" translatable="yes">Best _Fit</attribute>
+        <attribute name="action">win.zoom</attribute>
+        <attribute name="target">best-fit</attribute>
+        <attribute name="accel">f</attribute>
+      </item>
       <item>
         <attribute name="label" translatable="yes">Fit _Width</attribute>
         <attribute name="action">win.zoom</attribute>
@@ -44,44 +56,19 @@
           </object>
         </child>
         <child>
-          <object id="zoom-buttons" class="GtkBox">
-            <style>
-              <class name="linked"/>
-            </style>
+          <object id="zoom-menu-button" class="GtkMenuButton">
+            <property name="menu-model">zoom-menu</property>
+            <property name="tooltip-text" translatable="yes">Zoom options</property>
             <child>
-              <object id="zoom-best-fit" class="GtkToggleButton">
-                <property name="action-name">win.zoom</property>
-                <property name="action-target">"best-fit"</property>
-                <property name="tooltip-text" translatable="yes">Zoom to best fit</property>
-                <child>
-                  <object id="zoom-best-fit-image" class="GtkImage">
-                    <property name="icon-name">zoom-fit-best-symbolic</property>
-                    <property name="icon-size">1</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object id="zoom-original" class="GtkToggleButton">
-                <property name="action-name">win.zoom</property>
-                <property name="action-target">"original"</property>
-                <property name="tooltip-text" translatable="yes">Zoom to original size</property>
-                <child>
-                  <object id="zoom-original-image" class="GtkImage">
-                    <property name="icon-name">zoom-original-symbolic</property>
-                    <property name="icon-size">1</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object id="zoom-menu-button" class="GtkMenuButton">
-                <property name="name">zoom-menu-button</property>
-                <property name="menu-model">zoom-menu</property>
-                <property name="tooltip-text" translatable="yes">Adjust the zoom level</property>
+              <object id="zoom-menu-box" class="GtkBox">
                 <child>
                   <object id="zoom-label" class="GtkLabel">
                     <property name="width-chars">5</property>
+                  </object>
+                </child>
+                <child>
+                  <object id="zoom-arrow" class="GtkArrow">
+                    <property name="arrow-type">GTK_ARROW_DOWN</property>
                   </object>
                 </child>
               </object>

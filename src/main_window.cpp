@@ -84,34 +84,31 @@ void MainWindow::open_file_chooser() {
 }
 
 void MainWindow::zoom(const Glib::ustring& mode) {
-  if (mode == "best-fit")
-    image_view->zoom(image_view->ZOOM_BEST_FIT);
-  else if (mode == "fit-width")
-    image_view->zoom(image_view->ZOOM_FIT_WIDTH);
-  else if (mode == "original")
-    image_view->zoom(1.0);
-  else if (mode == "in" || mode == "in::step")
-    image_view->zoom_in(mode == "in::step");
-  else if (mode == "out" || mode == "out::step")
-    image_view->zoom_out(mode == "out::step");
-  zoom_label->set_text(to_percentage(image_view->zoom()));
-
-  // Changing the state first to an empty string forces the widgets to update.
-  // Otherwise, a button could be de-toggled by being activated twice in a row.
-  zoom_action->change_state(Glib::ustring());
-  if (mode == "best-fit" || mode == "fit-width" || mode == "original")
+  if (mode == "best-fit" || mode == "fit-width") {
+    if (mode == "best-fit")
+      image_view->zoom(image_view->ZOOM_BEST_FIT);
+    else if (mode == "fit-width")
+      image_view->zoom(image_view->ZOOM_FIT_WIDTH);
     zoom_action->change_state(mode);
-  else if (image_view->zoom() == 1.0)
-    zoom_action->change_state(Glib::ustring("original"));
+  } else {
+    if (mode == "normal")
+      image_view->zoom(1.0);
+    else if (mode == "in" || mode == "in::step")
+      image_view->zoom_in(mode == "in::step");
+    else if (mode == "out" || mode == "out::step")
+      image_view->zoom_out(mode == "out::step");
+    zoom_action->change_state(Glib::ustring());
+  }
+  zoom_label->set_text(to_percentage(image_view->zoom()));
 }
 
 void MainWindow::enable_zoom(bool enabled) {
   if (enabled) {
-    zoom_label->get_parent()->set_sensitive();
+    zoom_label->get_parent()->get_parent()->set_sensitive();
     zoom_label->set_text(to_percentage(image_view->zoom()));
     zoom_action->set_enabled();
   } else {
-    zoom_label->get_parent()->set_sensitive(false);
+    zoom_label->get_parent()->get_parent()->set_sensitive(false);
     zoom_label->set_text("100%");
     zoom_action->set_enabled(false);
   }

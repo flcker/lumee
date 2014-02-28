@@ -72,7 +72,7 @@ void Application::on_startup() {
 
 int Application::on_command_line(
     const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line) {
-  int argc;
+  int argc = 0;
   char** argv = command_line->get_arguments(argc);
 
   if (argc > 1)

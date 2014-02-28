@@ -43,7 +43,7 @@ class Application : public Gtk::Application {
   void hide_all_windows();
 
   const std::string data_dir = get_data_dir();
-  MainWindow* main_window;
+  MainWindow* main_window = nullptr;
   std::unique_ptr<Gtk::AboutDialog> about_dialog;
 };
 

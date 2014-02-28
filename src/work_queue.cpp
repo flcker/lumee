@@ -17,7 +17,7 @@
 #include "work_queue.h"
 
 WorkQueue::~WorkQueue() {
-  if (thread != nullptr) {
+  if (thread) {
     {
       Glib::Threads::Mutex::Lock lock(mutex);
       exiting = true;
@@ -28,7 +28,7 @@ WorkQueue::~WorkQueue() {
 }
 
 void WorkQueue::push(const sigc::slot<void>& slot) {
-  if (thread == nullptr)
+  if (!thread)
     thread = Glib::Threads::Thread::create(sigc::mem_fun(*this,
           &WorkQueue::run));
   {

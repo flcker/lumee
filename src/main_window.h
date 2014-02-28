@@ -51,10 +51,10 @@ class MainWindow : public Gtk::ApplicationWindow {
   // being shown.
   void enable_zoom(bool enabled = true);
 
-  Gtk::HeaderBar* header_bar;
-  Gtk::Label* zoom_label;
-  Gtk::TreeView* list_view;
-  ImageView* image_view;
+  Gtk::HeaderBar* header_bar = nullptr;
+  Gtk::Label* zoom_label = nullptr;
+  Gtk::TreeView* list_view = nullptr;
+  ImageView* image_view = nullptr;
   Glib::RefPtr<Gio::SimpleAction> zoom_action;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();

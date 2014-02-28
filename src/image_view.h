@@ -77,7 +77,7 @@ class ImageView : public Gtk::ScrolledWindow {
   // Used to avoid re-scaling the image when the zoom factor stays the same.
   double prev_zoom_factor = 0.0;
 
-  Gtk::Image* image;
+  Gtk::Image* image = nullptr;
 };
 
 #endif

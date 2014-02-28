@@ -28,8 +28,9 @@
 class ImageView : public Gtk::ScrolledWindow {
  public:
   enum ZoomMode {
-    ZOOM_BEST_FIT,  // Zoom to fit the area available.
-    ZOOM_FREE       // Zoom by an arbitrary factor.
+    ZOOM_BEST_FIT,   // Zoom to fit the area available.
+    ZOOM_FIT_WIDTH,  // Zoom to fit the width available.
+    ZOOM_FREE        // Zoom by an arbitrary factor.
   };
 
   // List of preset zoom factors.

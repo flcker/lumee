@@ -23,18 +23,26 @@
 #include <sstream>
 #include <unistd.h>
 
-double scale_best_fit(int dest_width, int dest_height, int src_width,
-    int src_height) {
+// When 'scrollbar_width' is nonzero, only width is constrained. Otherwise,
+// both width and height are constrained.
+double scale_to_fit(int dest_width, int dest_height, int src_width,
+    int src_height, int scrollbar_width) {
   int w, h;
-  if (src_width <= dest_width && src_height <= dest_height) {
+  if (src_width <= dest_width && (src_height <= dest_height ||
+        scrollbar_width)) {
     w = src_width;
     h = src_height;
   } else {
     w = dest_width;
-    h = std::round(w * src_height / src_width);
+    h = w * src_height / src_width;
     if (h > dest_height) {
-      h = dest_height;
-      w = std::round(src_width * h / src_height);
+      if (scrollbar_width) {
+        w = dest_width - scrollbar_width;
+        h = w * src_height / src_width;
+      } else {
+        h = dest_height;
+        w = src_width * h / src_height;
+      }
     }
   }
   return (double(w) / src_width + double(h) / src_height) / 2;

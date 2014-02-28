@@ -14,6 +14,14 @@
         <attribute name="accel">&lt;Primary&gt;minus</attribute>
       </item>
     </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Fit _Width</attribute>
+        <attribute name="action">win.zoom</attribute>
+        <attribute name="target">fit-width</attribute>
+        <attribute name="accel">w</attribute>
+      </item>
+    </section>
   </menu>
   <object id="main-window" class="GtkApplicationWindow">
     <property name="title">Lumee</property>

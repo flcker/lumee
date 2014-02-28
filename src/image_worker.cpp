@@ -66,7 +66,7 @@ void ImageWorker::do_load(const std::shared_ptr<Task>& task) {
     throw Gio::Error(Gio::Error::CANCELLED, "");
 
   if (task->scale_size) {
-    double factor = scale_best_fit(task->scale_size, task->scale_size,
+    double factor = scale_to_fit(task->scale_size, task->scale_size,
         pixbuf->get_width(), pixbuf->get_height());
     pixbuf = pixbuf->scale_simple(std::round(pixbuf->get_width() * factor),
         std::round(pixbuf->get_height() * factor), Gdk::INTERP_BILINEAR);

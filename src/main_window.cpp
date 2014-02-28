@@ -86,6 +86,8 @@ void MainWindow::open_file_chooser() {
 void MainWindow::zoom(const Glib::ustring& mode) {
   if (mode == "best-fit")
     image_view->zoom(image_view->ZOOM_BEST_FIT);
+  else if (mode == "fit-width")
+    image_view->zoom(image_view->ZOOM_FIT_WIDTH);
   else if (mode == "original")
     image_view->zoom(1.0);
   else if (mode == "in" || mode == "in::step")
@@ -97,7 +99,7 @@ void MainWindow::zoom(const Glib::ustring& mode) {
   // Changing the state first to an empty string forces the widgets to update.
   // Otherwise, a button could be de-toggled by being activated twice in a row.
   zoom_action->change_state(Glib::ustring());
-  if (mode == "best-fit" || mode == "original")
+  if (mode == "best-fit" || mode == "fit-width" || mode == "original")
     zoom_action->change_state(mode);
   else if (image_view->zoom() == 1.0)
     zoom_action->change_state(Glib::ustring("original"));

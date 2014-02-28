@@ -17,6 +17,8 @@
 #include "image_view.h"
 #include "utils.h"
 
+#include <gtkmm/scrollbar.h>
+
 const std::vector<double> ImageView::ZOOM_STEPS = {0.15, 1/3.0, 0.5, 2/3.0,
     1.0, 1.5, 2.0, 2.5, 3.0};
 const double ImageView::ZOOM_MULTIPLIER = 1.1;
@@ -60,12 +62,21 @@ void ImageView::zoom_out(bool step) {
 void ImageView::show_image() {
   if (!pixbuf)
     return;
+
   if (zoom_mode == ZOOM_BEST_FIT)
-    zoom_factor = scale_best_fit(get_allocated_width(), get_allocated_height(),
+    zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
         pixbuf->get_width(), pixbuf->get_height());
+  else if (zoom_mode == ZOOM_FIT_WIDTH) {
+    // The function takes two references, but we only need the first value.
+    int scrollbar_width = 0, _;
+    get_vscrollbar()->get_preferred_width(scrollbar_width, _);
+    zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
+        pixbuf->get_width(), pixbuf->get_height(), scrollbar_width);
+  }
   zoom_factor = std::max(ZOOM_MIN, std::min(ZOOM_MAX, zoom_factor));
   if (zoom_factor == prev_zoom_factor)
     return;  // Zoom factor didn't change, so there's no need to re-scale.
+
   image->set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
         std::round(pixbuf->get_width() * zoom_factor),
         std::round(pixbuf->get_height() * zoom_factor), Gdk::INTERP_BILINEAR));

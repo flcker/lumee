@@ -21,8 +21,12 @@
 
 // Returns the scale factor needed to fit the source area into the destination
 // area with aspect ratio preserved.
-double scale_best_fit(int dest_width, int dest_height, int src_width,
-    int src_height);
+//
+// If 'scrollbar_width' is specified, the scaled height will be allowed to
+// exceed the destination height, with the scrollbar's width being subtracted
+// from the destination width in this case.
+double scale_to_fit(int dest_width, int dest_height, int src_width,
+    int src_height, int scrollbar_width = 0);
 
 // Converts a decimal to its percentage (for example, 0.12 becomes "12%").
 std::string to_percentage(double decimal);

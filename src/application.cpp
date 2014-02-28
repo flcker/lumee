@@ -59,13 +59,13 @@ void Application::on_startup() {
   // Accelerators that do have a menu item may be duplicated here because they
   // aren't automatically added.
   add_accelerator("<Primary>o", "win.open");
-  add_accelerator("bracketleft", "win.zoom", g_variant_new_string("best-fit"));
-  add_accelerator("bracketright", "win.zoom", g_variant_new_string(
-        "original"));
+  add_accelerator("f", "win.zoom", g_variant_new_string("best-fit"));
+  add_accelerator("w", "win.zoom", g_variant_new_string("fit-width"));
+  add_accelerator("<Primary>0", "win.zoom", g_variant_new_string("original"));
   add_accelerator("equal", "win.zoom", g_variant_new_string("in"));
-  add_accelerator("minus", "win.zoom", g_variant_new_string("out"));
   add_accelerator("<Primary>equal", "win.zoom", g_variant_new_string(
         "in::step"));
+  add_accelerator("minus", "win.zoom", g_variant_new_string("out"));
   add_accelerator("<Primary>minus", "win.zoom", g_variant_new_string(
         "out::step"));
 }

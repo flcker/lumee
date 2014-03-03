@@ -35,17 +35,18 @@ class MainWindow : public Gtk::ApplicationWindow {
   void open(const Glib::RefPtr<Gio::File>& file);
 
  private:
+  // Opens a folder with a file chooser dialog.
+  void open_file_chooser();
+
   // Loads an image based on the file list's selection.
   void on_selection_changed();
 
   // Shows an image that has finished loading.
   void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 
-  // Opens a folder with a file chooser dialog.
-  void open_file_chooser();
-
   // Modifies the image's zoom.
-  void zoom(const Glib::ustring& mode);
+  void on_zoom(const Glib::ustring& mode);
+  void on_zoom_to_fit_expand();
 
   // Enables or disables zooming. Zooming should be disabled if no image is
   // being shown.
@@ -55,7 +56,9 @@ class MainWindow : public Gtk::ApplicationWindow {
   Gtk::Label* zoom_label = nullptr;
   Gtk::TreeView* list_view = nullptr;
   ImageView* image_view = nullptr;
-  Glib::RefPtr<Gio::SimpleAction> zoom_action;
+
+  Glib::RefPtr<Gio::SimpleAction> action_zoom;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit_expand;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;

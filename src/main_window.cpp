@@ -30,8 +30,10 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget_derived("image-view", image_view);
 
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
-  zoom_action = add_action_radio_string("zoom", sigc::mem_fun(*this,
-        &MainWindow::zoom), "best-fit");
+  action_zoom = add_action_radio_string("zoom", sigc::mem_fun(*this,
+        &MainWindow::on_zoom), "best-fit");
+  action_zoom_to_fit_expand = add_action_bool("zoom-to-fit-expand",
+      sigc::mem_fun(*this, &MainWindow::on_zoom_to_fit_expand));
   enable_zoom(false);
 
   list_view->set_model(image_list);
@@ -49,6 +51,16 @@ void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
   image_list->open_folder(file);
   folder_path = file->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
+}
+
+void MainWindow::open_file_chooser() {
+  Gtk::FileChooserDialog chooser(*this, _("Open Folder"),
+      Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+  chooser.add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
+  chooser.add_button(_("_Open"), Gtk::RESPONSE_ACCEPT);
+  chooser.set_current_folder(folder_path);
+  if (chooser.run() == Gtk::RESPONSE_ACCEPT)
+    open(chooser.get_file());
 }
 
 void MainWindow::on_selection_changed() {
@@ -73,43 +85,43 @@ void MainWindow::on_image_loaded(
   image_view->get_vadjustment()->set_value(0);
 }
 
-void MainWindow::open_file_chooser() {
-  Gtk::FileChooserDialog chooser(*this, _("Open Folder"),
-      Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-  chooser.add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-  chooser.add_button(_("_Open"), Gtk::RESPONSE_ACCEPT);
-  chooser.set_current_folder(folder_path);
-  if (chooser.run() == Gtk::RESPONSE_ACCEPT)
-    open(chooser.get_file());
-}
-
-void MainWindow::zoom(const Glib::ustring& mode) {
+void MainWindow::on_zoom(const Glib::ustring& mode) {
   if (mode == "best-fit" || mode == "fit-width") {
     if (mode == "best-fit")
-      image_view->zoom(image_view->ZOOM_BEST_FIT);
+      image_view->zoom_to_fit(image_view->ZOOM_FIT_BEST);
     else if (mode == "fit-width")
-      image_view->zoom(image_view->ZOOM_FIT_WIDTH);
-    zoom_action->change_state(mode);
+      image_view->zoom_to_fit(image_view->ZOOM_FIT_WIDTH);
+    action_zoom->change_state(mode);
+    action_zoom_to_fit_expand->set_enabled();
   } else {
     if (mode == "normal")
-      image_view->zoom(1.0);
+      image_view->zoom_to(1.0);
     else if (mode == "in" || mode == "in::step")
       image_view->zoom_in(mode == "in::step");
     else if (mode == "out" || mode == "out::step")
       image_view->zoom_out(mode == "out::step");
-    zoom_action->change_state(Glib::ustring());
+    action_zoom->change_state(Glib::ustring());
+    action_zoom_to_fit_expand->set_enabled(false);
   }
-  zoom_label->set_text(to_percentage(image_view->zoom()));
+  zoom_label->set_text(to_percentage(image_view->get_zoom()));
+}
+
+void MainWindow::on_zoom_to_fit_expand() {
+  bool expand = false;
+  action_zoom_to_fit_expand->get_state(expand);
+  action_zoom_to_fit_expand->change_state(!expand);
+  image_view->zoom_to_fit_expand(!expand);
+  zoom_label->set_text(to_percentage(image_view->get_zoom()));
 }
 
 void MainWindow::enable_zoom(bool enabled) {
   if (enabled) {
     zoom_label->get_parent()->get_parent()->set_sensitive();
-    zoom_label->set_text(to_percentage(image_view->zoom()));
-    zoom_action->set_enabled();
+    zoom_label->set_text(to_percentage(image_view->get_zoom()));
+    action_zoom->set_enabled();
   } else {
     zoom_label->get_parent()->get_parent()->set_sensitive(false);
     zoom_label->set_text("100%");
-    zoom_action->set_enabled(false);
+    action_zoom->set_enabled(false);
   }
 }

@@ -27,10 +27,10 @@
 // TODO: In best fit mode, re-zoom the image when the window is resized.
 class ImageView : public Gtk::ScrolledWindow {
  public:
-  enum ZoomMode {
-    ZOOM_BEST_FIT,   // Zoom to fit the area available.
-    ZOOM_FIT_WIDTH,  // Zoom to fit the width available.
-    ZOOM_FREE        // Zoom by an arbitrary factor.
+  enum ZoomFit {
+    ZOOM_FIT_BEST,   // Fits both width and height.
+    ZOOM_FIT_WIDTH,  // Fits only width.
+    ZOOM_FIT_NONE    // No automatic fit.
   };
 
   // List of preset zoom factors.
@@ -49,15 +49,24 @@ class ImageView : public Gtk::ScrolledWindow {
   void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
   void clear();
 
-  void zoom(ZoomMode mode) {
-    zoom_mode = mode;
+  double get_zoom() const { return zoom_factor; }
+
+  void zoom_to_fit(ZoomFit fit) {
+    zoom_fit = fit;
     show_image();
   }
-  void zoom(double factor) {
-    zoom_factor = factor;
-    zoom(ZOOM_FREE);
+
+  // Expands images to fit. If true, images smaller than the allocated area
+  // will be zoomed in when zoom-to-fit is enabled.
+  void zoom_to_fit_expand(bool expand) {
+    zoom_fit_expand = expand;
+    show_image();
   }
-  double zoom() const { return zoom_factor; }
+
+  void zoom_to(double factor) {
+    zoom_factor = factor;
+    zoom_to_fit(ZOOM_FIT_NONE);
+  }
 
   // Zooms in or out. When 'step' is true, the zoom factor snaps to the next
   // preset value.
@@ -71,7 +80,8 @@ class ImageView : public Gtk::ScrolledWindow {
   // The original unscaled pixbuf.
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
-  ZoomMode zoom_mode = ZOOM_BEST_FIT;
+  ZoomFit zoom_fit = ZOOM_FIT_BEST;
+  bool zoom_fit_expand = false;
   double zoom_factor = 1.0;
 
   // Used to avoid re-scaling the image when the zoom factor stays the same.

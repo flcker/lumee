@@ -45,33 +45,34 @@ void ImageView::zoom_in(bool step) {
   if (step) {
     auto iter = std::find_if(ZOOM_STEPS.begin(), ZOOM_STEPS.end(),
         [this](double x) { return x > zoom_factor; });
-    zoom(iter != ZOOM_STEPS.end() ? *iter : ZOOM_MAX);
+    zoom_to(iter != ZOOM_STEPS.end() ? *iter : ZOOM_MAX);
   } else
-    zoom(zoom_factor * ZOOM_MULTIPLIER);
+    zoom_to(zoom_factor * ZOOM_MULTIPLIER);
 }
 
 void ImageView::zoom_out(bool step) {
   if (step) {
     auto iter = std::find_if(ZOOM_STEPS.rbegin(), ZOOM_STEPS.rend(),
         [this](double x) { return x < zoom_factor; });
-    zoom(iter != ZOOM_STEPS.rend() ? *iter : ZOOM_MIN);
+    zoom_to(iter != ZOOM_STEPS.rend() ? *iter : ZOOM_MIN);
   } else
-    zoom(zoom_factor / ZOOM_MULTIPLIER);
+    zoom_to(zoom_factor / ZOOM_MULTIPLIER);
 }
 
 void ImageView::show_image() {
   if (!pixbuf)
     return;
 
-  if (zoom_mode == ZOOM_BEST_FIT)
+  if (zoom_fit == ZOOM_FIT_BEST)
     zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
-        pixbuf->get_width(), pixbuf->get_height());
-  else if (zoom_mode == ZOOM_FIT_WIDTH) {
+        pixbuf->get_width(), pixbuf->get_height(), zoom_fit_expand);
+  else if (zoom_fit == ZOOM_FIT_WIDTH) {
     // The function takes two references, but we only need the first value.
     int scrollbar_width = 0, _;
     get_vscrollbar()->get_preferred_width(scrollbar_width, _);
     zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
-        pixbuf->get_width(), pixbuf->get_height(), scrollbar_width);
+        pixbuf->get_width(), pixbuf->get_height(), zoom_fit_expand,
+        scrollbar_width);
   }
   zoom_factor = std::max(ZOOM_MIN, std::min(ZOOM_MAX, zoom_factor));
   if (zoom_factor == prev_zoom_factor)

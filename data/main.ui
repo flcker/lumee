@@ -34,6 +34,12 @@
         <attribute name="accel">w</attribute>
       </item>
     </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Expand to Fit</attribute>
+        <attribute name="action">win.zoom-to-fit-expand</attribute>
+      </item>
+    </section>
   </menu>
   <object id="main-window" class="GtkApplicationWindow">
     <property name="title">Lumee</property>

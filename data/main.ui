@@ -24,7 +24,7 @@
       <item>
         <attribute name="label" translatable="yes">Best _Fit</attribute>
         <attribute name="action">win.zoom</attribute>
-        <attribute name="target">best-fit</attribute>
+        <attribute name="target">fit-best</attribute>
         <attribute name="accel">f</attribute>
       </item>
       <item>

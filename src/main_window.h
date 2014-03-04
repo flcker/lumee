@@ -44,21 +44,18 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Shows an image that has finished loading.
   void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 
-  // Modifies the image's zoom.
-  void on_zoom(const Glib::ustring& mode);
-  void on_zoom_to_fit_expand();
+  // Modifies the zoom state.
+  void zoom(const Glib::ustring& mode);
+  void zoom_to_fit_expand();
+  void on_zoom_changed();
 
-  // Enables or disables zooming. Zooming should be disabled if no image is
-  // being shown.
-  void enable_zoom(bool enabled = true);
+  Glib::RefPtr<Gio::SimpleAction> action_zoom;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit_expand;
 
   Gtk::HeaderBar* header_bar = nullptr;
   Gtk::Label* zoom_label = nullptr;
   Gtk::TreeView* list_view = nullptr;
   ImageView* image_view = nullptr;
-
-  Glib::RefPtr<Gio::SimpleAction> action_zoom;
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit_expand;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;

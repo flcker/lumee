@@ -31,16 +31,18 @@ MainWindow::MainWindow(BaseObjectType* cobject,
 
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
   action_zoom = add_action_radio_string("zoom", sigc::mem_fun(*this,
-        &MainWindow::on_zoom), "best-fit");
+        &MainWindow::zoom), "fit-best");
   action_zoom_to_fit_expand = add_action_bool("zoom-to-fit-expand",
-      sigc::mem_fun(*this, &MainWindow::on_zoom_to_fit_expand));
-  enable_zoom(false);
+      sigc::mem_fun(*this, &MainWindow::zoom_to_fit_expand));
 
   list_view->set_model(image_list);
   list_view->append_column("", image_list->columns.thumbnail);
   list_view->set_tooltip_column(image_list->columns.escaped_name.index());
   list_view->get_selection()->signal_changed().connect(sigc::mem_fun(*this,
         &MainWindow::on_selection_changed));
+  image_view->signal_zoom_changed.connect(sigc::mem_fun(*this,
+        &MainWindow::on_zoom_changed));
+  on_zoom_changed();  // Set up the initial state.
 
   image_worker.signal_finished.connect(sigc::mem_fun(*this,
         &MainWindow::on_image_loaded));
@@ -71,7 +73,6 @@ void MainWindow::on_selection_changed() {
   else {  // No selection.
     image_view->clear();
     header_bar->set_subtitle("");
-    enable_zoom(false);
   }
 }
 
@@ -79,49 +80,39 @@ void MainWindow::on_image_loaded(
     const std::shared_ptr<ImageWorker::Task>& task) {
   image_view->set(task->pixbuf);
   header_bar->set_subtitle(Glib::filename_display_basename(task->path));
-  enable_zoom();
   // Reset scroll position.
   image_view->get_hadjustment()->set_value(0);
   image_view->get_vadjustment()->set_value(0);
 }
 
-void MainWindow::on_zoom(const Glib::ustring& mode) {
-  if (mode == "best-fit" || mode == "fit-width") {
-    if (mode == "best-fit")
-      image_view->zoom_to_fit(image_view->ZOOM_FIT_BEST);
-    else if (mode == "fit-width")
-      image_view->zoom_to_fit(image_view->ZOOM_FIT_WIDTH);
-    action_zoom->change_state(mode);
-    action_zoom_to_fit_expand->set_enabled();
-  } else {
-    if (mode == "normal")
-      image_view->zoom_to(1.0);
-    else if (mode == "in" || mode == "in::step")
-      image_view->zoom_in(mode == "in::step");
-    else if (mode == "out" || mode == "out::step")
-      image_view->zoom_out(mode == "out::step");
-    action_zoom->change_state(Glib::ustring());
-    action_zoom_to_fit_expand->set_enabled(false);
-  }
-  zoom_label->set_text(to_percentage(image_view->get_zoom()));
+void MainWindow::zoom(const Glib::ustring& mode) {
+  action_zoom->change_state(mode == "fit-best" || mode == "fit-width" ? mode :
+      Glib::ustring());
+  if (mode == "fit-best")
+    image_view->zoom_to_fit(image_view->ZOOM_FIT_BEST);
+  else if (mode == "fit-width")
+    image_view->zoom_to_fit(image_view->ZOOM_FIT_WIDTH);
+  else if (mode == "normal")
+    image_view->zoom_to(1.0);
+  else if (mode == "in" || mode == "in::step")
+    image_view->zoom_in(mode == "in::step");
+  else if (mode == "out" || mode == "out::step")
+    image_view->zoom_out(mode == "out::step");
 }
 
-void MainWindow::on_zoom_to_fit_expand() {
+void MainWindow::zoom_to_fit_expand() {
   bool expand = false;
   action_zoom_to_fit_expand->get_state(expand);
   action_zoom_to_fit_expand->change_state(!expand);
   image_view->zoom_to_fit_expand(!expand);
-  zoom_label->set_text(to_percentage(image_view->get_zoom()));
 }
 
-void MainWindow::enable_zoom(bool enabled) {
-  if (enabled) {
-    zoom_label->get_parent()->get_parent()->set_sensitive();
-    zoom_label->set_text(to_percentage(image_view->get_zoom()));
-    action_zoom->set_enabled();
-  } else {
-    zoom_label->get_parent()->get_parent()->set_sensitive(false);
-    zoom_label->set_text("100%");
-    action_zoom->set_enabled(false);
-  }
+void MainWindow::on_zoom_changed() {
+  bool can_zoom = !image_view->empty();
+  Glib::ustring zoom_fit;
+  action_zoom->get_state(zoom_fit);
+  action_zoom->set_enabled(can_zoom);
+  action_zoom_to_fit_expand->set_enabled(can_zoom && !zoom_fit.empty());
+  zoom_label->set_text(to_percentage(can_zoom ? image_view->get_zoom() : 1.0));
+  zoom_label->get_parent()->get_parent()->set_sensitive(can_zoom);
 }

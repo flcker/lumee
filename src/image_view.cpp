@@ -34,11 +34,13 @@ void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
   this->pixbuf = pixbuf;
   prev_zoom_factor = 0.0;
   show_image();
+  signal_zoom_changed.emit();
 }
 
 void ImageView::clear() {
   pixbuf.reset();
   image->clear();
+  signal_zoom_changed.emit();
 }
 
 void ImageView::zoom_in(bool step) {

@@ -48,12 +48,14 @@ class ImageView : public Gtk::ScrolledWindow {
 
   void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
   void clear();
+  bool empty() const { return !bool(pixbuf); }
 
   double get_zoom() const { return zoom_factor; }
 
   void zoom_to_fit(ZoomFit fit) {
     zoom_fit = fit;
     show_image();
+    signal_zoom_changed.emit();
   }
 
   // Expands images to fit. If true, images smaller than the allocated area
@@ -72,6 +74,9 @@ class ImageView : public Gtk::ScrolledWindow {
   // preset value.
   void zoom_in(bool step = false);
   void zoom_out(bool step = false);
+
+  // Emitted when the zoom state changes, or an image is set or cleared.
+  sigc::signal<void> signal_zoom_changed;
 
  private:
   // Shows the image based on current zoom settings.

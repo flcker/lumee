@@ -66,7 +66,7 @@ void Application::on_startup() {
   add_accelerator("<Primary>minus", "win.zoom", g_variant_new_string(
         "out::step"));
   add_accelerator("<Primary>0", "win.zoom", g_variant_new_string("normal"));
-  add_accelerator("f", "win.zoom", g_variant_new_string("best-fit"));
+  add_accelerator("f", "win.zoom", g_variant_new_string("fit-best"));
   add_accelerator("w", "win.zoom", g_variant_new_string("fit-width"));
 }
 

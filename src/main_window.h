@@ -35,6 +35,9 @@ class MainWindow : public Gtk::ApplicationWindow {
   void open(const Glib::RefPtr<Gio::File>& file);
 
  private:
+  // Creates and adds the window actions.
+  void add_actions();
+
   // Opens a folder with a file chooser dialog.
   void open_file_chooser();
 
@@ -45,11 +48,18 @@ class MainWindow : public Gtk::ApplicationWindow {
   void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 
   // Modifies the zoom state.
-  void zoom(const Glib::ustring& mode);
+  void zoom_in(bool step);
+  void zoom_out(bool step);
+  void zoom_normal();
+  void zoom_to_fit(const Glib::ustring& mode);
   void zoom_to_fit_expand();
   void on_zoom_changed();
 
-  Glib::RefPtr<Gio::SimpleAction> action_zoom;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_in;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_in_no_step;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_out;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_out_no_step;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit;
   Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit_expand;
 
   Gtk::HeaderBar* header_bar = nullptr;

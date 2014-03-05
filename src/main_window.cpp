@@ -28,24 +28,18 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget("zoom-label", zoom_label);
   builder->get_widget("list-view", list_view);
   builder->get_widget_derived("image-view", image_view);
-
-  add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
-  action_zoom = add_action_radio_string("zoom", sigc::mem_fun(*this,
-        &MainWindow::zoom), "fit-best");
-  action_zoom_to_fit_expand = add_action_bool("zoom-to-fit-expand",
-      sigc::mem_fun(*this, &MainWindow::zoom_to_fit_expand));
+  add_actions();
 
   list_view->set_model(image_list);
   list_view->append_column("", image_list->columns.thumbnail);
   list_view->set_tooltip_column(image_list->columns.escaped_name.index());
-  list_view->get_selection()->signal_changed().connect(sigc::mem_fun(*this,
-        &MainWindow::on_selection_changed));
-  image_view->signal_zoom_changed.connect(sigc::mem_fun(*this,
-        &MainWindow::on_zoom_changed));
-  on_zoom_changed();  // Set up the initial state.
-
-  image_worker.signal_finished.connect(sigc::mem_fun(*this,
-        &MainWindow::on_image_loaded));
+  list_view->get_selection()->signal_changed().connect(
+      sigc::mem_fun(*this, &MainWindow::on_selection_changed));
+  image_view->signal_zoom_changed.connect(
+      sigc::mem_fun(*this, &MainWindow::on_zoom_changed));
+  image_worker.signal_finished.connect(
+      sigc::mem_fun(*this, &MainWindow::on_image_loaded));
+  on_zoom_changed();  // Initialize zoom state.
   show_all_children();
 }
 
@@ -53,6 +47,23 @@ void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
   image_list->open_folder(file);
   folder_path = file->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
+}
+
+void MainWindow::add_actions() {
+  add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
+  action_zoom_in = add_action("zoom-in",
+      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), true));
+  action_zoom_in_no_step = add_action("zoom-in-no-step",
+      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), false));
+  action_zoom_out = add_action("zoom-out",
+      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_out), true));
+  action_zoom_out_no_step = add_action("zoom-out-no-step",
+      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_out), false));
+  add_action("zoom-normal", sigc::mem_fun(*this, &MainWindow::zoom_normal));
+  action_zoom_to_fit = add_action_radio_string("zoom-to-fit",
+      sigc::mem_fun(*this, &MainWindow::zoom_to_fit), "fit-best");
+  action_zoom_to_fit_expand = add_action_bool("zoom-to-fit-expand",
+      sigc::mem_fun(*this, &MainWindow::zoom_to_fit_expand));
 }
 
 void MainWindow::open_file_chooser() {
@@ -85,19 +96,16 @@ void MainWindow::on_image_loaded(
   image_view->get_vadjustment()->set_value(0);
 }
 
-void MainWindow::zoom(const Glib::ustring& mode) {
-  action_zoom->change_state(mode == "fit-best" || mode == "fit-width" ? mode :
-      Glib::ustring());
-  if (mode == "fit-best")
-    image_view->zoom_to_fit(image_view->ZOOM_FIT_BEST);
-  else if (mode == "fit-width")
-    image_view->zoom_to_fit(image_view->ZOOM_FIT_WIDTH);
-  else if (mode == "normal")
-    image_view->zoom_to(1.0);
-  else if (mode == "in" || mode == "in::step")
-    image_view->zoom_in(mode == "in::step");
-  else if (mode == "out" || mode == "out::step")
-    image_view->zoom_out(mode == "out::step");
+void MainWindow::zoom_in(bool step) { image_view->zoom_in(step); }
+void MainWindow::zoom_out(bool step) { image_view->zoom_out(step); }
+void MainWindow::zoom_normal() { image_view->zoom_to(1.0); }
+
+void MainWindow::zoom_to_fit(const Glib::ustring& fit) {
+  action_zoom_to_fit->change_state(fit);
+  if (fit == "fit-best")
+    image_view->zoom_to_fit(ImageView::ZOOM_FIT_BEST);
+  else if (fit == "fit-width")
+    image_view->zoom_to_fit(ImageView::ZOOM_FIT_WIDTH);
 }
 
 void MainWindow::zoom_to_fit_expand() {
@@ -109,10 +117,17 @@ void MainWindow::zoom_to_fit_expand() {
 
 void MainWindow::on_zoom_changed() {
   bool can_zoom = !image_view->empty();
-  Glib::ustring zoom_fit;
-  action_zoom->get_state(zoom_fit);
-  action_zoom->set_enabled(can_zoom);
-  action_zoom_to_fit_expand->set_enabled(can_zoom && !zoom_fit.empty());
   zoom_label->set_text(to_percentage(can_zoom ? image_view->get_zoom() : 1.0));
   zoom_label->get_parent()->get_parent()->set_sensitive(can_zoom);
+
+  action_zoom_in->set_enabled(can_zoom && !image_view->zoom_is_max());
+  action_zoom_in_no_step->set_enabled(can_zoom && !image_view->zoom_is_max());
+  action_zoom_out->set_enabled(can_zoom && !image_view->zoom_is_min());
+  action_zoom_out_no_step->set_enabled(can_zoom && !image_view->zoom_is_min());
+
+  action_zoom_to_fit->set_enabled(can_zoom);
+  bool zoom_is_fit = image_view->get_zoom_fit() != ImageView::ZOOM_FIT_NONE;
+  if (!zoom_is_fit)
+    action_zoom_to_fit->change_state(Glib::ustring());  // Clear radio state.
+  action_zoom_to_fit_expand->set_enabled(can_zoom && zoom_is_fit);
 }

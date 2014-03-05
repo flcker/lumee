@@ -61,6 +61,23 @@ void ImageView::zoom_out(bool step) {
     zoom_to(zoom_factor / ZOOM_MULTIPLIER);
 }
 
+void ImageView::zoom_to(double factor) {
+  zoom_factor = factor;
+  zoom_to_fit(ZOOM_FIT_NONE);
+}
+
+void ImageView::zoom_to_fit(ZoomFit fit) {
+  zoom_fit = fit;
+  show_image();
+  signal_zoom_changed.emit();
+}
+
+void ImageView::zoom_to_fit_expand(bool expand) {
+  zoom_fit_expand = expand;
+  show_image();
+  signal_zoom_changed.emit();
+}
+
 void ImageView::show_image() {
   if (!pixbuf)
     return;

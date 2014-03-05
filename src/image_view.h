@@ -24,7 +24,7 @@
 // Displays a single image at various zoom settings.
 //
 // TODO: Improve the zoom performance at large image resolutions.
-// TODO: In best fit mode, re-zoom the image when the window is resized.
+// TODO: In zoom-to-fit mode, re-zoom the image when the window is resized.
 class ImageView : public Gtk::ScrolledWindow {
  public:
   enum ZoomFit {
@@ -33,6 +33,34 @@ class ImageView : public Gtk::ScrolledWindow {
     ZOOM_FIT_NONE    // No automatic fit.
   };
 
+  ImageView(BaseObjectType* cobject,
+      const Glib::RefPtr<Gtk::Builder>& builder);
+
+  void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
+  void clear();
+  bool empty() const { return !bool(pixbuf); }
+
+  double get_zoom() const { return zoom_factor; }
+  bool zoom_is_max() const { return zoom_factor >= ZOOM_MAX; }
+  bool zoom_is_min() const { return zoom_factor <= ZOOM_MIN; }
+  ZoomFit get_zoom_fit() const { return zoom_fit; }
+
+  // Zooms in or out. When 'step' is true, the zoom factor snaps to the next
+  // preset value. Otherwise, a multiplier is used.
+  void zoom_in(bool step);
+  void zoom_out(bool step);
+
+  void zoom_to(double factor);
+  void zoom_to_fit(ZoomFit fit);
+
+  // Expands images to fit. If true, images smaller than the allocated area
+  // will be zoomed in when zoom-to-fit is enabled.
+  void zoom_to_fit_expand(bool expand);
+
+  // Emitted when the zoom state changes, or an image is set or cleared.
+  sigc::signal<void> signal_zoom_changed;
+
+ private:
   // List of preset zoom factors.
   static const std::vector<double> ZOOM_STEPS;
 
@@ -43,42 +71,6 @@ class ImageView : public Gtk::ScrolledWindow {
   static const double ZOOM_MIN;
   static const double ZOOM_MAX;
 
-  ImageView(BaseObjectType* cobject,
-      const Glib::RefPtr<Gtk::Builder>& builder);
-
-  void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
-  void clear();
-  bool empty() const { return !bool(pixbuf); }
-
-  double get_zoom() const { return zoom_factor; }
-
-  void zoom_to_fit(ZoomFit fit) {
-    zoom_fit = fit;
-    show_image();
-    signal_zoom_changed.emit();
-  }
-
-  // Expands images to fit. If true, images smaller than the allocated area
-  // will be zoomed in when zoom-to-fit is enabled.
-  void zoom_to_fit_expand(bool expand) {
-    zoom_fit_expand = expand;
-    show_image();
-  }
-
-  void zoom_to(double factor) {
-    zoom_factor = factor;
-    zoom_to_fit(ZOOM_FIT_NONE);
-  }
-
-  // Zooms in or out. When 'step' is true, the zoom factor snaps to the next
-  // preset value.
-  void zoom_in(bool step = false);
-  void zoom_out(bool step = false);
-
-  // Emitted when the zoom state changes, or an image is set or cleared.
-  sigc::signal<void> signal_zoom_changed;
-
- private:
   // Shows the image based on current zoom settings.
   void show_image();
 

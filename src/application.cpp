@@ -41,7 +41,6 @@ Application::Application()
 
 void Application::on_startup() {
   Gtk::Application::on_startup();
-
   add_action("about", sigc::mem_fun(*this, &Application::show_about_dialog));
   add_action("quit", sigc::mem_fun(*this, &Application::hide_all_windows));
 
@@ -59,30 +58,26 @@ void Application::on_startup() {
   // Accelerators that do have a menu item may be duplicated here because they
   // aren't automatically added.
   add_accelerator("<Primary>o", "win.open");
-  add_accelerator("equal", "win.zoom", g_variant_new_string("in"));
-  add_accelerator("<Primary>equal", "win.zoom", g_variant_new_string(
-        "in::step"));
-  add_accelerator("minus", "win.zoom", g_variant_new_string("out"));
-  add_accelerator("<Primary>minus", "win.zoom", g_variant_new_string(
-        "out::step"));
-  add_accelerator("<Primary>0", "win.zoom", g_variant_new_string("normal"));
-  add_accelerator("f", "win.zoom", g_variant_new_string("fit-best"));
-  add_accelerator("w", "win.zoom", g_variant_new_string("fit-width"));
+  add_accelerator("<Primary>equal", "win.zoom-in");
+  add_accelerator("equal", "win.zoom-in-no-step");
+  add_accelerator("<Primary>minus", "win.zoom-out");
+  add_accelerator("minus", "win.zoom-out-no-step");
+  add_accelerator("<Primary>0", "win.zoom-normal");
+  add_accelerator("f", "win.zoom-to-fit", g_variant_new_string("fit-best"));
+  add_accelerator("w", "win.zoom-to-fit", g_variant_new_string("fit-width"));
 }
 
 int Application::on_command_line(
     const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line) {
   int argc = 0;
   char** argv = command_line->get_arguments(argc);
-
   if (argc > 1)
     open(command_line->create_file_for_arg(argv[1]));
   else if (!command_line->is_remote())
     open(Gio::File::create_for_path(Glib::get_user_special_dir(
             G_USER_DIRECTORY_PICTURES)));
-
-  main_window->present();
   g_strfreev(argv);
+  main_window->present();
   return EXIT_SUCCESS;
 }
 

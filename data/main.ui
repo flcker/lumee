@@ -3,33 +3,30 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">Zoom _In</attribute>
-        <attribute name="action">win.zoom</attribute>
-        <attribute name="target">in::step</attribute>
+        <attribute name="action">win.zoom-in</attribute>
         <attribute name="accel">&lt;Primary&gt;equal</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Zoom _Out</attribute>
-        <attribute name="action">win.zoom</attribute>
-        <attribute name="target">out::step</attribute>
+        <attribute name="action">win.zoom-out</attribute>
         <attribute name="accel">&lt;Primary&gt;minus</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Normal Size</attribute>
-        <attribute name="action">win.zoom</attribute>
-        <attribute name="target">normal</attribute>
+        <attribute name="action">win.zoom-normal</attribute>
         <attribute name="accel">&lt;Primary&gt;0</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Best _Fit</attribute>
-        <attribute name="action">win.zoom</attribute>
+        <attribute name="action">win.zoom-to-fit</attribute>
         <attribute name="target">fit-best</attribute>
         <attribute name="accel">f</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Fit _Width</attribute>
-        <attribute name="action">win.zoom</attribute>
+        <attribute name="action">win.zoom-to-fit</attribute>
         <attribute name="target">fit-width</attribute>
         <attribute name="accel">w</attribute>
       </item>

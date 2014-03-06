@@ -17,14 +17,7 @@
 #include "work_queue.h"
 
 WorkQueue::~WorkQueue() {
-  if (thread) {
-    {
-      Glib::Threads::Mutex::Lock lock(mutex);
-      exiting = true;
-    }
-    cond.broadcast();
-    thread->join();
-  }
+  stop();
 }
 
 void WorkQueue::push(const sigc::slot<void>& slot) {
@@ -43,14 +36,28 @@ void WorkQueue::clear() {
   deque.clear();
 }
 
+void WorkQueue::stop() {
+  if (thread) {
+    {
+      Glib::Threads::Mutex::Lock lock(mutex);
+      if (stopping)
+        return;
+      stopping = true;
+    }
+    cond.broadcast();
+    thread->join();
+  }
+}
+
 void WorkQueue::run() {
   while (true) {
     sigc::slot<void> slot;
     {
       Glib::Threads::Mutex::Lock lock(mutex);
-      while (!exiting && deque.empty())
+      while (!stopping && deque.empty())
         cond.wait(mutex);
-      if (exiting) break;
+      if (stopping)
+        break;
 
       slot = deque.front();
       deque.pop_front();

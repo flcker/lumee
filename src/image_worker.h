@@ -49,6 +49,7 @@ class ImageWorker {
   };
 
   ImageWorker();
+  ~ImageWorker();
 
   // Adds a loading task to the queue.
   void load(const std::string& path, const int scale_size = 0,

@@ -25,6 +25,11 @@ ImageWorker::ImageWorker() {
   dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
 }
 
+ImageWorker::~ImageWorker() {
+  cancel_all();
+  work_queue.stop();
+}
+
 void ImageWorker::load(const std::string& path, const int scale_size,
     Gtk::TreeIter iter) {
   work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
@@ -46,7 +51,8 @@ void ImageWorker::process(const sigc::slot<void, std::shared_ptr<Task>>& slot,
   try {
     slot(task);
   } catch (const Gio::Error& error) {
-    if (error.code() == Gio::Error::CANCELLED) return;
+    if (error.code() == Gio::Error::CANCELLED)
+      return;
     else throw;
   }
   {

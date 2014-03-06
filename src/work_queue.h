@@ -24,7 +24,6 @@
 // Executes work in a thread.
 class WorkQueue {
  public:
-  // If a thread has been started, waits for it to exit.
   ~WorkQueue();
 
   // Adds a slot to the end of the queue. If this is the first time push() is
@@ -33,6 +32,9 @@ class WorkQueue {
 
   // Removes all slots from the queue.
   void clear();
+
+  // Stops processing the queue and waits for the thread to exit.
+  void stop();
 
   // Slot that is invoked in the critical section after a work slot is popped
   // from the queue, before the work slot is invoked.
@@ -46,7 +48,7 @@ class WorkQueue {
   Glib::Threads::Mutex mutex;
   Glib::Threads::Cond cond;
   std::deque<sigc::slot<void>> deque;
-  bool exiting = false;
+  bool stopping = false;
 };
 
 #endif  // LUMEE_WORK_QUEUE_H

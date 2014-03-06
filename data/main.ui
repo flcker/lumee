@@ -38,20 +38,21 @@
       </item>
     </section>
   </menu>
-  <object id="main-window" class="GtkApplicationWindow">
+
+  <object class="GtkApplicationWindow" id="main-window">
     <property name="title">Lumee</property>
     <property name="default-width">800</property>
     <property name="default-height">500</property>
     <property name="window-position">GTK_WIN_POS_CENTER</property>
     <child type="titlebar">
-      <object id="header-bar" class="GtkHeaderBar">
+      <object class="GtkHeaderBar" id="header-bar">
         <property name="show-close-button">true</property>
         <child>
-          <object id="open-button" class="GtkButton">
+          <object class="GtkButton" id="open-button">
             <property name="action-name">win.open</property>
             <property name="tooltip-text" translatable="yes">Open folder</property>
             <child>
-              <object id="open-button-image" class="GtkImage">
+              <object class="GtkImage" id="open-button-image">
                 <property name="icon-name">folder-symbolic</property>
                 <property name="icon-size">1</property>
               </object>
@@ -59,18 +60,18 @@
           </object>
         </child>
         <child>
-          <object id="zoom-menu-button" class="GtkMenuButton">
+          <object class="GtkMenuButton" id="zoom-menu-button">
             <property name="menu-model">zoom-menu</property>
             <property name="tooltip-text" translatable="yes">Zoom options</property>
             <child>
-              <object id="zoom-menu-box" class="GtkBox">
+              <object class="GtkBox" id="zoom-menu-box">
                 <child>
-                  <object id="zoom-label" class="GtkLabel">
+                  <object class="GtkLabel" id="zoom-label">
                     <property name="width-chars">5</property>
                   </object>
                 </child>
                 <child>
-                  <object id="zoom-arrow" class="GtkArrow">
+                  <object class="GtkArrow" id="zoom-arrow">
                     <property name="arrow-type">GTK_ARROW_DOWN</property>
                   </object>
                 </child>
@@ -84,18 +85,18 @@
       </object>
     </child>
     <child>
-      <object id="grid" class="GtkGrid">
+      <object class="GtkGrid" id="grid">
         <child>
-          <object id="scrolled-window" class="GtkScrolledWindow">
+          <object class="GtkScrolledWindow" id="scrolled-window">
             <property name="min-content-width">119</property>
             <child>
-              <object id="list-view" class="GtkTreeView">
-                <property name="name">file-list</property>
-                <property name="vexpand">true</property>
-                <property name="headers-visible">false</property>
+              <object class="GtkTreeView" id="list-view">
+                <property name="name">list-view</property>
                 <property name="enable-search">false</property>
+                <property name="headers-visible">false</property>
+                <property name="vexpand">true</property>
                 <child internal-child="selection">
-                  <object id="list-selection" class="GtkTreeSelection">
+                  <object class="GtkTreeSelection" id="list-selection">
                     <property name="mode">GTK_SELECTION_BROWSE</property>
                   </object>
                 </child>
@@ -104,9 +105,9 @@
           </object>
         </child>
         <child>
-          <object id="image-view" class="GtkScrolledWindow">
+          <object class="GtkScrolledWindow" id="image-view">
             <child>
-              <object id="image" class="GtkImage">
+              <object class="GtkImage" id="image">
                 <property name="hexpand">true</property>
               </object>
             </child>

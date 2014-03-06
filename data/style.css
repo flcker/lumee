@@ -1,6 +1,6 @@
-#file-list {
+#list-view {
     -GtkTreeView-vertical-separator: 8;
 }
-#file-list:selected {
+#list-view:selected {
     -GtkWidget-focus-line-width: 0;
 }

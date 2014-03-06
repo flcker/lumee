@@ -43,9 +43,9 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   show_all_children();
 }
 
-void MainWindow::open(const Glib::RefPtr<Gio::File>& file) {
-  image_list->open_folder(file);
-  folder_path = file->get_path();
+void MainWindow::open(const Glib::RefPtr<Gio::File>& folder) {
+  image_list->open_folder(folder);
+  folder_path = folder->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
 

@@ -33,18 +33,18 @@ class ImageList : public Gtk::ListStore {
     Columns() { add(path); add(escaped_name); add(thumbnail); }
   };
 
-  static const int THUMBNAIL_SIZE;
-
   ImageList();
 
   // Opens a folder, replacing the current list with the folder's images.
-  void open_folder(const Glib::RefPtr<Gio::File>& file);
+  void open_folder(const Glib::RefPtr<Gio::File>& folder);
 
   static Glib::RefPtr<ImageList> create();
 
   const Columns columns;
 
  private:
+  static const int THUMBNAIL_SIZE;
+
   bool is_supported_mime_type(const Glib::ustring& mime_type);
   void on_thumbnail_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 

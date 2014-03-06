@@ -32,7 +32,7 @@ class MainWindow : public Gtk::ApplicationWindow {
       const Glib::RefPtr<Gtk::Builder>& builder);
 
   // Opens a folder.
-  void open(const Glib::RefPtr<Gio::File>& file);
+  void open(const Glib::RefPtr<Gio::File>& folder);
 
  private:
   // Creates and adds the window actions.

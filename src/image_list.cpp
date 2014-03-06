@@ -36,26 +36,24 @@ ImageList::ImageList() {
         &ImageList::on_thumbnail_loaded));
 }
 
-void ImageList::open_folder(const Glib::RefPtr<Gio::File>& file) {
-  // TODO: Make this async.
-  Glib::RefPtr<Gio::FileEnumerator> enumerator = file->enumerate_children(
+// TODO: Make this async.
+void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
+  Glib::RefPtr<Gio::FileEnumerator> enumerator = folder->enumerate_children(
       G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
   image_worker.cancel_all();  // Cancel everything from the previous folder.
   clear();
-
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
     if (info->is_hidden() || !is_supported_mime_type(info->get_content_type()))
       continue;
-
     Gtk::TreeIter iter = append();
     Gtk::TreeRow row = *iter;
-    row[columns.path] =
-        Glib::build_filename(file->get_path(), info->get_name());
-    row[columns.escaped_name] =
-        Glib::Markup::escape_text(info->get_display_name());
+    row[columns.path] = Glib::build_filename(folder->get_path(),
+        info->get_name());
+    row[columns.escaped_name] = Glib::Markup::escape_text(
+        info->get_display_name());
     row[columns.thumbnail] = thumbnail_loading_icon;
     image_worker.load(row[columns.path], THUMBNAIL_SIZE, iter);
   }

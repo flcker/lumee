@@ -32,7 +32,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
 
   list_view->set_model(image_list);
   list_view->append_column("", image_list->columns.thumbnail);
-  list_view->set_tooltip_column(image_list->columns.escaped_name.index());
+  list_view->set_tooltip_column(image_list->columns.tooltip.index());
   list_view->get_selection()->signal_changed().connect(
       sigc::mem_fun(*this, &MainWindow::on_selection_changed));
   image_view->signal_zoom_changed.connect(
@@ -40,6 +40,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   image_worker.signal_finished.connect(
       sigc::mem_fun(*this, &MainWindow::on_image_loaded));
   on_zoom_changed();  // Initialize zoom state.
+  sort("name");
   show_all_children();
 }
 
@@ -64,6 +65,10 @@ void MainWindow::add_actions() {
       sigc::mem_fun(*this, &MainWindow::zoom_to_fit), "fit-best");
   action_zoom_to_fit_expand = add_action_bool("zoom-to-fit-expand",
       sigc::mem_fun(*this, &MainWindow::zoom_to_fit_expand));
+  action_sort = add_action_radio_string("sort",
+      sigc::mem_fun(*this, &MainWindow::sort), "");
+  action_sort_reversed = add_action_bool("sort-reversed",
+      sigc::mem_fun(*this, &MainWindow::sort_reversed));
 }
 
 void MainWindow::open_file_chooser() {
@@ -130,4 +135,24 @@ void MainWindow::on_zoom_changed() {
   if (!zoom_is_fit)
     action_zoom_to_fit->change_state(Glib::ustring());  // Clear radio state.
   action_zoom_to_fit_expand->set_enabled(can_zoom && zoom_is_fit);
+}
+
+void MainWindow::sort(const Glib::ustring& column) {
+  action_sort->change_state(column);
+  bool reversed = false;
+  action_sort_reversed->get_state(reversed);
+  Gtk::SortType order = reversed ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING;
+  if (column == "name")
+    image_list->set_sort_column(image_list->columns.display_name, order);
+  else if (column == "modification-date")
+    image_list->set_sort_column(image_list->columns.time_modified, order);
+}
+
+void MainWindow::sort_reversed() {
+  bool reversed = false;
+  action_sort_reversed->get_state(reversed);
+  action_sort_reversed->change_state(!reversed);
+  Glib::ustring column;
+  action_sort->get_state(column);
+  sort(column);  // Re-sort with new sort order.
 }

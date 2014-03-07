@@ -42,7 +42,8 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
       G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
       G_FILE_ATTRIBUTE_STANDARD_NAME ","
       G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
-      G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
+      G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE ","
+      G_FILE_ATTRIBUTE_TIME_MODIFIED);
   image_worker.cancel_all();  // Cancel everything from the previous folder.
   clear();
   while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
@@ -52,9 +53,14 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
     Gtk::TreeRow row = *iter;
     row[columns.path] = Glib::build_filename(folder->get_path(),
         info->get_name());
-    row[columns.escaped_name] = Glib::Markup::escape_text(
-        info->get_display_name());
+    row[columns.display_name] = info->get_display_name();
+    row[columns.time_modified] = info->get_attribute_uint64(
+        G_FILE_ATTRIBUTE_TIME_MODIFIED);
     row[columns.thumbnail] = thumbnail_loading_icon;
+    row[columns.tooltip] = "<b>" +
+        Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
+        Glib::Markup::escape_text(Glib::DateTime::create_now_local(
+            row[columns.time_modified]).format("%c"));
     image_worker.load(row[columns.path], THUMBNAIL_SIZE, iter);
   }
 }

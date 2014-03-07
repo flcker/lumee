@@ -47,7 +47,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Shows an image that has finished loading.
   void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
 
-  // Modifies the zoom state.
+  // Handlers for zoom actions.
   void zoom_in(bool step);
   void zoom_out(bool step);
   void zoom_normal();
@@ -55,12 +55,18 @@ class MainWindow : public Gtk::ApplicationWindow {
   void zoom_to_fit_expand();
   void on_zoom_changed();
 
+  // Handlers for sort actions.
+  void sort(const Glib::ustring& column);
+  void sort_reversed();
+
   Glib::RefPtr<Gio::SimpleAction> action_zoom_in;
   Glib::RefPtr<Gio::SimpleAction> action_zoom_in_no_step;
   Glib::RefPtr<Gio::SimpleAction> action_zoom_out;
   Glib::RefPtr<Gio::SimpleAction> action_zoom_out_no_step;
   Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit;
   Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit_expand;
+  Glib::RefPtr<Gio::SimpleAction> action_sort;
+  Glib::RefPtr<Gio::SimpleAction> action_sort_reversed;
 
   Gtk::HeaderBar* header_bar = nullptr;
   Gtk::Label* zoom_label = nullptr;

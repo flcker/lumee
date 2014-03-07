@@ -27,10 +27,13 @@ class ImageList : public Gtk::ListStore {
  public:
   struct Columns : public Gtk::TreeModelColumnRecord {
     Gtk::TreeModelColumn<std::string> path;
-    Gtk::TreeModelColumn<Glib::ustring> escaped_name;
+    Gtk::TreeModelColumn<Glib::ustring> display_name;
+    Gtk::TreeModelColumn<guint64> time_modified;
     Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thumbnail;
+    Gtk::TreeModelColumn<Glib::ustring> tooltip;
 
-    Columns() { add(path); add(escaped_name); add(thumbnail); }
+    Columns() { add(path); add(display_name); add(time_modified);
+      add(thumbnail); add(tooltip); }
   };
 
   ImageList();

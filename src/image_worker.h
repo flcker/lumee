@@ -31,50 +31,50 @@ class ImageWorker {
  public:
   // A task that can be processed.
   struct Task {
+    Task(const std::string& path, int scale_size, const Gtk::TreeIter& iter)
+        : path(path), scale_size(scale_size), iter(iter) {}
+    Task() {}
+
     // Path to the image file.
-    const std::string path;
+    std::string path;
 
     // Size to scale the image to, if any (assumes an equal width and height).
-    const int scale_size;
-
-    // Will contain the result of the task.
-    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+    int scale_size = 0;
 
     // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
     // there's a cleaner way to store this.
     Gtk::TreeIter iter;
 
-    Task(const std::string& path, const int scale_size, Gtk::TreeIter iter)
-        : path(path), scale_size(scale_size), iter(iter) {}
+    // Result of the task after being processed.
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
   };
 
   ImageWorker();
   ~ImageWorker();
 
   // Adds a loading task to the queue.
-  void load(const std::string& path, const int scale_size = 0,
-      Gtk::TreeIter iter = Gtk::TreeIter());
+  void load(const std::string& path, int scale_size = 0,
+      const Gtk::TreeIter& iter = Gtk::TreeIter());
 
   // Cancels the running task and removes all queued tasks.
   void cancel_all();
 
   // Notifies when an image is done.
-  sigc::signal<void, std::shared_ptr<Task>> signal_finished;
+  sigc::signal<void, Task> signal_finished;
 
  private:
   // Processes a slot and task, communicating the result to the main thread.
-  void process(const sigc::slot<void, std::shared_ptr<Task>>& slot,
-      const std::shared_ptr<Task>& task);
+  void process(const sigc::slot<void, Task&>& slot, Task& task);
 
   // Loads an image.
-  void do_load(const std::shared_ptr<Task>& task);
+  void do_load(Task& task);
 
   void emit_finished();
 
   WorkQueue work_queue;
   Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
   Glib::Threads::Mutex mutex;
-  std::queue<std::shared_ptr<Task>> result_queue;
+  std::queue<Task> result_queue;
   Glib::Dispatcher dispatcher;
 };
 

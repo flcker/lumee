@@ -92,10 +92,9 @@ void MainWindow::on_selection_changed() {
   }
 }
 
-void MainWindow::on_image_loaded(
-    const std::shared_ptr<ImageWorker::Task>& task) {
-  image_view->set(task->pixbuf);
-  header_bar->set_subtitle(Glib::filename_display_basename(task->path));
+void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
+  image_view->set(task.pixbuf);
+  header_bar->set_subtitle(Glib::filename_display_basename(task.path));
   // Reset scroll position.
   image_view->get_hadjustment()->set_value(0);
   image_view->get_vadjustment()->set_value(0);

@@ -77,10 +77,9 @@ bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
       mime_type) != end(supported_mime_types);
 }
 
-void ImageList::on_thumbnail_loaded(
-    const std::shared_ptr<ImageWorker::Task>& task) {
-  if (task->iter) {
-    Gtk::TreeRow row = *task->iter;
-    row[columns.thumbnail] = task->pixbuf;
+void ImageList::on_thumbnail_loaded(const ImageWorker::Task& task) {
+  if (task.iter) {
+    Gtk::TreeRow row = *task.iter;
+    row[columns.thumbnail] = task.pixbuf;
   }
 }

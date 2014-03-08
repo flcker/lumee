@@ -45,7 +45,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   void on_selection_changed();
 
   // Shows an image that has finished loading.
-  void on_image_loaded(const std::shared_ptr<ImageWorker::Task>& task);
+  void on_image_loaded(const ImageWorker::Task& task);
 
   // Handlers for zoom actions.
   void zoom_in(bool step);

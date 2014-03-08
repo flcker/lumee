@@ -30,11 +30,11 @@ ImageWorker::~ImageWorker() {
   work_queue.stop();
 }
 
-void ImageWorker::load(const std::string& path, const int scale_size,
-    Gtk::TreeIter iter) {
+void ImageWorker::load(const std::string& path, int scale_size,
+    const Gtk::TreeIter& iter) {
   work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
         sigc::mem_fun(*this, &ImageWorker::do_load),
-        std::make_shared<Task>(path, scale_size, iter)));
+        Task(path, scale_size, iter)));
 }
 
 // Because the cancellable is reset before each task, clear() needs to run
@@ -46,8 +46,7 @@ void ImageWorker::cancel_all() {
 }
 
 // Runs in a worker thread.
-void ImageWorker::process(const sigc::slot<void, std::shared_ptr<Task>>& slot,
-    const std::shared_ptr<Task>& task) {
+void ImageWorker::process(const sigc::slot<void, Task&>& slot, Task& task) {
   try {
     slot(task);
   } catch (const Gio::Error& error) {
@@ -57,34 +56,34 @@ void ImageWorker::process(const sigc::slot<void, std::shared_ptr<Task>>& slot,
   }
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    result_queue.push(task);
+    result_queue.push(std::move(task));
   }
   dispatcher.emit();
 }
 
 // Runs in a worker thread.
-void ImageWorker::do_load(const std::shared_ptr<Task>& task) {
+void ImageWorker::do_load(Task& task) {
   // TODO: Compare Pixbuf::create_from_file's speed with PixbufLoader.
   // TODO: Check if network-mounted or very large images can stall the thread.
   // TODO: Support animated images.
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(task->path);
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(task.path);
   if (cancellable->is_cancelled())
     throw Gio::Error(Gio::Error::CANCELLED, "");
 
-  if (task->scale_size) {
-    double factor = scale_to_fit(task->scale_size, task->scale_size,
+  if (task.scale_size) {
+    double factor = scale_to_fit(task.scale_size, task.scale_size,
         pixbuf->get_width(), pixbuf->get_height());
     pixbuf = pixbuf->scale_simple(std::round(pixbuf->get_width() * factor),
         std::round(pixbuf->get_height() * factor), Gdk::INTERP_BILINEAR);
     if (cancellable->is_cancelled())
       throw Gio::Error(Gio::Error::CANCELLED, "");
   }
-  task->pixbuf = pixbuf;
+  task.pixbuf = pixbuf;
 }
 
 // Runs in the main thread.
 void ImageWorker::emit_finished() {
-  std::shared_ptr<Task> task;
+  Task task;
   {
     Glib::Threads::Mutex::Lock lock(mutex);
     task = result_queue.front();

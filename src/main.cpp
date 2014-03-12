@@ -18,9 +18,6 @@
 
 #include <glibmm/miscutils.h>
 
-// Support C++11 lambdas as sigc functors.
-namespace sigc { SIGC_FUNCTORS_DEDUCE_RESULT_TYPE_WITH_DECLTYPE }
-
 int main(int argc, char* argv[]) {
   RuntimeInfo::init();
   if (!RuntimeInfo::is_installed())

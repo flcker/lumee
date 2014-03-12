@@ -30,6 +30,8 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget_derived("image-view", image_view);
   add_actions();
 
+  settings->signal_changed().connect(
+      sigc::mem_fun(*this, &MainWindow::on_setting_changed));
   list_view->set_model(image_list);
   list_view->append_column("", image_list->columns.thumbnail);
   list_view->set_tooltip_column(image_list->columns.tooltip.index());
@@ -39,8 +41,10 @@ MainWindow::MainWindow(BaseObjectType* cobject,
       sigc::mem_fun(*this, &MainWindow::on_zoom_changed));
   image_worker.signal_finished.connect(
       sigc::mem_fun(*this, &MainWindow::on_image_loaded));
-  on_zoom_changed();  // Initialize zoom state.
-  sort("name");
+  // Call some signal handlers now to initialize them.
+  on_zoom_changed();
+  on_setting_changed("sort-by");
+  on_setting_changed("zoom-to-fit-expand");
   show_all_children();
 }
 
@@ -63,12 +67,9 @@ void MainWindow::add_actions() {
   add_action("zoom-normal", sigc::mem_fun(*this, &MainWindow::zoom_normal));
   action_zoom_to_fit = add_action_radio_string("zoom-to-fit",
       sigc::mem_fun(*this, &MainWindow::zoom_to_fit), "fit-best");
-  action_zoom_to_fit_expand = add_action_bool("zoom-to-fit-expand",
-      sigc::mem_fun(*this, &MainWindow::zoom_to_fit_expand));
-  action_sort = add_action_radio_string("sort",
-      sigc::mem_fun(*this, &MainWindow::sort), "");
-  action_sort_reversed = add_action_bool("sort-reversed",
-      sigc::mem_fun(*this, &MainWindow::sort_reversed));
+  action_zoom_to_fit_expand = settings->create_action("zoom-to-fit-expand");
+  add_action(settings->create_action("sort-by"));
+  add_action(settings->create_action("sort-reversed"));
 }
 
 void MainWindow::open_file_chooser() {
@@ -100,6 +101,14 @@ void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
   image_view->get_vadjustment()->set_value(0);
 }
 
+void MainWindow::on_setting_changed(const Glib::ustring& key) {
+  if (key == "sort-by" || key == "sort-reversed")
+    sort(settings->get_string("sort-by"),
+        settings->get_boolean("sort-reversed"));
+  else if (key == "zoom-to-fit-expand")
+    image_view->zoom_to_fit_expand(settings->get_boolean(key));
+}
+
 void MainWindow::zoom_in(bool step) { image_view->zoom_in(step); }
 void MainWindow::zoom_out(bool step) { image_view->zoom_out(step); }
 void MainWindow::zoom_normal() { image_view->zoom_to(1.0); }
@@ -110,13 +119,6 @@ void MainWindow::zoom_to_fit(const Glib::ustring& fit) {
     image_view->zoom_to_fit(ImageView::ZOOM_FIT_BEST);
   else if (fit == "fit-width")
     image_view->zoom_to_fit(ImageView::ZOOM_FIT_WIDTH);
-}
-
-void MainWindow::zoom_to_fit_expand() {
-  bool expand = false;
-  action_zoom_to_fit_expand->get_state(expand);
-  action_zoom_to_fit_expand->change_state(!expand);
-  image_view->zoom_to_fit_expand(!expand);
 }
 
 void MainWindow::on_zoom_changed() {
@@ -130,28 +132,17 @@ void MainWindow::on_zoom_changed() {
   action_zoom_out_no_step->set_enabled(can_zoom && !image_view->zoom_is_min());
 
   action_zoom_to_fit->set_enabled(can_zoom);
-  bool zoom_is_fit = image_view->get_zoom_fit() != ImageView::ZOOM_FIT_NONE;
-  if (!zoom_is_fit)
+  if (image_view->get_zoom_fit() == ImageView::ZOOM_FIT_NONE) {
     action_zoom_to_fit->change_state(Glib::ustring());  // Clear radio state.
-  action_zoom_to_fit_expand->set_enabled(can_zoom && zoom_is_fit);
+    remove_action("zoom-to-fit-expand");
+  } else
+    add_action(action_zoom_to_fit_expand);
 }
 
-void MainWindow::sort(const Glib::ustring& column) {
-  action_sort->change_state(column);
-  bool reversed = false;
-  action_sort_reversed->get_state(reversed);
+void MainWindow::sort(const Glib::ustring& mode, bool reversed) {
   Gtk::SortType order = reversed ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING;
-  if (column == "name")
+  if (mode == "name")
     image_list->set_sort_column(image_list->columns.display_name, order);
-  else if (column == "modification-date")
+  else if (mode == "modification-date")
     image_list->set_sort_column(image_list->columns.time_modified, order);
-}
-
-void MainWindow::sort_reversed() {
-  bool reversed = false;
-  action_sort_reversed->get_state(reversed);
-  action_sort_reversed->change_state(!reversed);
-  Glib::ustring column;
-  action_sort->get_state(column);
-  sort(column);  // Re-sort with new sort order.
 }

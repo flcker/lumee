@@ -1,6 +1,8 @@
+*.gschema.valid
 *.o
 .deps
 .dirstamp
+gschemas.compiled
 /aclocal.m4
 /autom4te.cache
 /build-aux

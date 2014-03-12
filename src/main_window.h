@@ -21,6 +21,7 @@
 #include "image_view.h"
 #include "image_worker.h"
 
+#include <giomm/settings.h>
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/headerbar.h>
@@ -47,26 +48,22 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Shows an image that has finished loading.
   void on_image_loaded(const ImageWorker::Task& task);
 
+  void on_setting_changed(const Glib::ustring& key);
+
   // Handlers for zoom actions.
   void zoom_in(bool step);
   void zoom_out(bool step);
   void zoom_normal();
-  void zoom_to_fit(const Glib::ustring& mode);
-  void zoom_to_fit_expand();
+  void zoom_to_fit(const Glib::ustring& fit);
   void on_zoom_changed();
 
-  // Handlers for sort actions.
-  void sort(const Glib::ustring& column);
-  void sort_reversed();
+  void sort(const Glib::ustring& mode, bool reversed);
 
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_in;
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_in_no_step;
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_out;
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_out_no_step;
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit;
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_to_fit_expand;
-  Glib::RefPtr<Gio::SimpleAction> action_sort;
-  Glib::RefPtr<Gio::SimpleAction> action_sort_reversed;
+  Glib::RefPtr<Gio::Settings> settings = Gio::Settings::create(
+      "com.github.bmars.Lumee");
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_in, action_zoom_in_no_step,
+      action_zoom_out, action_zoom_out_no_step, action_zoom_to_fit;
+  Glib::RefPtr<Gio::Action> action_zoom_to_fit_expand;
 
   Gtk::HeaderBar* header_bar = nullptr;
   Gtk::Label* zoom_label = nullptr;

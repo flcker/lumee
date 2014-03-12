@@ -35,7 +35,7 @@ Glib::RefPtr<Application> Application::create() {
 }
 
 Application::Application()
-    : Gtk::Application("net.beyondboredom.Lumee",
+    : Gtk::Application("com.github.bmars.Lumee",
         Gio::APPLICATION_HANDLES_OPEN |
         Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
 
@@ -87,6 +87,7 @@ void Application::on_open(const type_vec_files& files,
 }
 
 void Application::load_ui() {
+  std::string data_dir = RuntimeInfo::get_data_dir();
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
   builder->add_from_file(Glib::build_filename(data_dir, "app_menu.ui"));
   set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(

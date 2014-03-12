@@ -43,12 +43,12 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">By _Name</attribute>
-        <attribute name="action">win.sort</attribute>
+        <attribute name="action">win.sort-by</attribute>
         <attribute name="target">name</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">By Modification _Date</attribute>
-        <attribute name="action">win.sort</attribute>
+        <attribute name="action">win.sort-by</attribute>
         <attribute name="target">modification-date</attribute>
       </item>
     </section>

@@ -1,0 +1,23 @@
+<schemalist>
+  <schema id="com.github.bmars.Lumee" path="/com/github/bmars/Lumee/">
+    <key name="sort-by" type="s">
+      <choices>
+        <choice value="name"/>
+        <choice value="modification-date"/>
+      </choices>
+      <default>'name'</default>
+      <summary>Sorting mode</summary>
+      <description>The sorting mode for the image list.</description>
+    </key>
+    <key name="sort-reversed" type="b">
+      <default>false</default>
+      <summary>Reversed sorting</summary>
+      <description>Whether to sort the image list in reversed order.</description>
+    </key>
+    <key name="zoom-to-fit-expand" type="b">
+      <default>false</default>
+      <summary>Expand with zoom-to-fit</summary>
+      <description>Whether to expand images with zoom-to-fit.</description>
+    </key>
+  </schema>
+</schemalist>

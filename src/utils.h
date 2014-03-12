@@ -19,6 +19,20 @@
 
 #include <string>
 
+// Information about the application's runtime environment.
+class RuntimeInfo {
+ public:
+  // Initializes the class; call this first.
+  static void init();
+
+  static bool is_installed() { return installed; }
+  static std::string get_data_dir() { return data_dir; }
+
+ private:
+  static bool installed;
+  static std::string data_dir;
+};
+
 // Returns the scale factor needed to fit the source area into the destination
 // area. The factor won't exceed 1.0 unless 'expand' is true.
 //
@@ -30,8 +44,5 @@ double scale_to_fit(int dest_width, int dest_height, int src_width,
 
 // Converts a decimal to its percentage (for example, 0.12 becomes "12%").
 std::string to_percentage(double decimal);
-
-// Returns a path to the data directory.
-std::string get_data_dir();
 
 #endif

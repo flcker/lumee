@@ -23,6 +23,26 @@
 #include <sstream>
 #include <unistd.h>
 
+bool RuntimeInfo::installed = true;
+std::string RuntimeInfo::data_dir = PKGDATADIR;
+
+// Checks the location of the current executable, in order to support being run
+// from the build directory. Doing this isn't portable and may need changes for
+// other operating systems.
+//
+// static
+void RuntimeInfo::init() {
+  char exe_file[PATH_MAX];
+  ssize_t size = readlink("/proc/self/exe", exe_file, PATH_MAX);
+  if (size != -1) {
+    std::string exe_dir = Glib::path_get_dirname(std::string(exe_file, size));
+    if (exe_dir != BINDIR) {
+      installed = false;
+      data_dir = Glib::build_filename(exe_dir, "data");
+    }
+  }
+}
+
 // When 'scrollbar_width' is nonzero, only width is constrained. Otherwise,
 // both width and height are constrained.
 double scale_to_fit(int dest_width, int dest_height, int src_width,
@@ -52,18 +72,4 @@ std::string to_percentage(double decimal) {
   std::stringstream s;
   s << std::round(decimal * 100) << "%";
   return s.str();
-}
-
-// Checks the location of the current executable, in order to support being run
-// from the build directory. Doing this isn't portable and may need changes for
-// other operating systems.
-std::string get_data_dir() {
-  char exe_file[PATH_MAX];
-  ssize_t size = readlink("/proc/self/exe", exe_file, PATH_MAX);
-  if (size != -1) {
-    std::string exe_dir = Glib::path_get_dirname(std::string(exe_file, size));
-    if (exe_dir != BINDIR)
-      return Glib::build_filename(exe_dir, "data");
-  }
-  return PKGDATADIR;
 }

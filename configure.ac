@@ -6,6 +6,7 @@ AM_INIT_AUTOMAKE([1.11 foreign dist-xz no-dist-gzip subdir-objects -Wall
                   -Werror])
 AM_SILENT_RULES(yes)
 
+GLIB_GSETTINGS
 PKG_CHECK_MODULES(gtkmm, [gtkmm-3.0 >= 3.10.0])
 
 AC_LANG(C++)

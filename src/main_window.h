@@ -35,6 +35,10 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Opens a folder.
   void open(const Glib::RefPtr<Gio::File>& folder);
 
+ protected:
+  // Saves the window's maximized state to a setting.
+  virtual bool on_window_state_event(GdkEventWindowState* event);
+
  private:
   // Creates and adds the window actions.
   void add_actions();

@@ -45,6 +45,9 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   on_zoom_changed();
   on_setting_changed("sort-by");
   on_setting_changed("zoom-to-fit-expand");
+
+  if (settings->get_boolean("maximized"))
+    maximize();
   show_all_children();
 }
 
@@ -52,6 +55,13 @@ void MainWindow::open(const Glib::RefPtr<Gio::File>& folder) {
   image_list->open_folder(folder);
   folder_path = folder->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
+}
+
+bool MainWindow::on_window_state_event(GdkEventWindowState* event) {
+  if (event->changed_mask & GDK_WINDOW_STATE_MAXIMIZED)
+    settings->set_boolean("maximized",
+        event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED);
+  return Gtk::ApplicationWindow::on_window_state_event(event);
 }
 
 void MainWindow::add_actions() {

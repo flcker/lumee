@@ -1,5 +1,10 @@
 <schemalist>
   <schema id="com.github.bmars.Lumee" path="/com/github/bmars/Lumee/">
+    <key name="maximized" type="b">
+      <default>false</default>
+      <summary>Maximized window</summary>
+      <description>Whether the window is maximized.</description>
+    </key>
     <key name="sort-by" type="s">
       <choices>
         <choice value="name"/>

@@ -9,7 +9,6 @@ lumee_SOURCES = src/application.cpp src/application.h src/image_list.cpp \
 lumee_CPPFLAGS = -DPKGDATADIR=\"$(pkgdatadir)\" -DBINDIR=\"$(bindir)\" \
                  $(gtkmm_CFLAGS)
 lumee_LDADD = $(gtkmm_LIBS)
-EXTRA_DIST = README.md $(gsettings_SCHEMAS)
 
 @GSETTINGS_RULES@
 
@@ -17,3 +16,6 @@ EXTRA_DIST = README.md $(gsettings_SCHEMAS)
 data/gschemas.compiled: $(gsettings_SCHEMAS:.xml=.valid)
 	$(AM_V_GEN) $(GLIB_COMPILE_SCHEMAS) data
 all-local: data/gschemas.compiled
+
+EXTRA_DIST = README.md $(gsettings_SCHEMAS)
+CLEANFILES = data/gschemas.compiled

@@ -24,7 +24,6 @@
 // Displays a single image at various zoom settings.
 //
 // TODO: Improve the zoom performance at large image resolutions.
-// TODO: In zoom-to-fit mode, re-zoom the image when the window is resized.
 class ImageView : public Gtk::ScrolledWindow {
  public:
   enum ZoomFit {
@@ -60,6 +59,9 @@ class ImageView : public Gtk::ScrolledWindow {
   // Emitted when the zoom state changes, or an image is set or cleared.
   sigc::signal<void> signal_zoom_changed;
 
+ protected:
+  virtual void on_size_allocate(Gtk::Allocation& allocation);
+
  private:
   // List of preset zoom factors.
   static const std::vector<double> ZOOM_STEPS;
@@ -72,7 +74,8 @@ class ImageView : public Gtk::ScrolledWindow {
   static const double ZOOM_MAX;
 
   // Updates the image based on current zoom settings.
-  void update();
+  void update(const Gtk::Allocation& allocation);
+  void update() { update(get_allocation()); }
 
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
   Gtk::Image* image = nullptr;

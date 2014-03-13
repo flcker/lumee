@@ -78,16 +78,22 @@ void ImageView::zoom_to_fit_expand(bool expand) {
   signal_zoom_changed.emit();
 }
 
-void ImageView::update() {
+void ImageView::on_size_allocate(Gtk::Allocation& allocation) {
+  update(allocation);
+  Gtk::ScrolledWindow::on_size_allocate(allocation);
+  signal_zoom_changed.emit();
+}
+
+void ImageView::update(const Gtk::Allocation& allocation) {
   if (empty())
     return;
   else if (zoom_fit == ZOOM_FIT_BEST)
-    zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
+    zoom_factor = scale_to_fit(allocation.get_width(), allocation.get_height(),
         pixbuf->get_width(), pixbuf->get_height(), zoom_fit_expand);
   else if (zoom_fit == ZOOM_FIT_WIDTH) {
     int scrollbar_width = 0, _;  // '_' is an unused placeholder.
     get_vscrollbar()->get_preferred_width(scrollbar_width, _);
-    zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
+    zoom_factor = scale_to_fit(allocation.get_width(), allocation.get_height(),
         pixbuf->get_width(), pixbuf->get_height(), zoom_fit_expand,
         scrollbar_width);
   }

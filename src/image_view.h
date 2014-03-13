@@ -71,20 +71,16 @@ class ImageView : public Gtk::ScrolledWindow {
   static const double ZOOM_MIN;
   static const double ZOOM_MAX;
 
-  // Shows the image based on current zoom settings.
-  void show_image();
+  // Updates the image based on current zoom settings.
+  void update();
 
-  // The original unscaled pixbuf.
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
+  Gtk::Image* image = nullptr;
 
   ZoomFit zoom_fit = ZOOM_FIT_BEST;
   bool zoom_fit_expand = false;
   double zoom_factor = 1.0;
-
-  // Used to avoid re-scaling the image when the zoom factor stays the same.
-  double prev_zoom_factor = 0.0;
-
-  Gtk::Image* image = nullptr;
+  double prev_zoom_factor = 0.0;  // Helps avoid re-scaling at the same factor.
 };
 
 #endif

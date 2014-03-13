@@ -33,7 +33,7 @@ ImageView::ImageView(BaseObjectType* cobject,
 void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
   this->pixbuf = pixbuf;
   prev_zoom_factor = 0.0;
-  show_image();
+  update();
   signal_zoom_changed.emit();
 }
 
@@ -68,37 +68,36 @@ void ImageView::zoom_to(double factor) {
 
 void ImageView::zoom_to_fit(ZoomFit fit) {
   zoom_fit = fit;
-  show_image();
+  update();
   signal_zoom_changed.emit();
 }
 
 void ImageView::zoom_to_fit_expand(bool expand) {
   zoom_fit_expand = expand;
-  show_image();
+  update();
   signal_zoom_changed.emit();
 }
 
-void ImageView::show_image() {
-  if (!pixbuf)
+void ImageView::update() {
+  if (empty())
     return;
-
-  if (zoom_fit == ZOOM_FIT_BEST)
+  else if (zoom_fit == ZOOM_FIT_BEST)
     zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
         pixbuf->get_width(), pixbuf->get_height(), zoom_fit_expand);
   else if (zoom_fit == ZOOM_FIT_WIDTH) {
-    // The function takes two references, but we only need the first value.
-    int scrollbar_width = 0, _;
+    int scrollbar_width = 0, _;  // '_' is an unused placeholder.
     get_vscrollbar()->get_preferred_width(scrollbar_width, _);
     zoom_factor = scale_to_fit(get_allocated_width(), get_allocated_height(),
         pixbuf->get_width(), pixbuf->get_height(), zoom_fit_expand,
         scrollbar_width);
   }
   zoom_factor = std::max(ZOOM_MIN, std::min(ZOOM_MAX, zoom_factor));
-  if (zoom_factor == prev_zoom_factor)
-    return;  // Zoom factor didn't change, so there's no need to re-scale.
 
-  image->set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
-        std::round(pixbuf->get_width() * zoom_factor),
-        std::round(pixbuf->get_height() * zoom_factor), Gdk::INTERP_BILINEAR));
-  prev_zoom_factor = zoom_factor;
+  if (zoom_factor != prev_zoom_factor) {
+    image->set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
+          std::round(pixbuf->get_width() * zoom_factor),
+          std::round(pixbuf->get_height() * zoom_factor),
+          Gdk::INTERP_BILINEAR));
+    prev_zoom_factor = zoom_factor;
+  }
 }

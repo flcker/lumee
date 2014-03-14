@@ -44,7 +44,7 @@ void Application::on_startup() {
   add_action("about", sigc::mem_fun(*this, &Application::show_about_dialog));
   add_action("quit", sigc::mem_fun(*this, &Application::hide_all_windows));
 
-  Gtk::Window::set_default_icon_name("emblem-photos");
+  Gtk::Window::set_default_icon_name("image-x-generic");
   Gtk::Settings::get_default()->
       property_gtk_application_prefer_dark_theme() = true;
   try {
@@ -106,7 +106,7 @@ void Application::load_ui() {
 void Application::show_about_dialog() {
   if (!about_dialog) {
     about_dialog = std::unique_ptr<Gtk::AboutDialog>(new Gtk::AboutDialog());
-    about_dialog->set_logo_icon_name("emblem-photos");
+    about_dialog->set_logo_icon_name("image-x-generic");
     about_dialog->set_program_name(PACKAGE_NAME);
     about_dialog->set_version(PACKAGE_VERSION);
     about_dialog->set_comments(_("A folder-based image viewer."));

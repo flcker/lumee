@@ -1,6 +1,10 @@
 bin_PROGRAMS = lumee
 dist_pkgdata_DATA = data/app_menu.ui data/main.ui data/style.css
 gsettings_SCHEMAS = data/com.github.bmars.Lumee.gschema.xml
+
+desktopdir = $(datadir)/applications
+dist_desktop_DATA = data/lumee.desktop
+
 lumee_SOURCES = src/application.cpp src/application.h src/image_list.cpp \
                 src/image_list.h src/image_view.cpp src/image_view.h \
                 src/image_worker.cpp src/image_worker.h src/main.cpp \

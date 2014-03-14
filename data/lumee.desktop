@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Lumee
+GenericName=Image Viewer
+Comment=View folders of images
+Icon=image-x-generic
+StartupNotify=true
+Exec=lumee

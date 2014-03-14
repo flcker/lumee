@@ -26,8 +26,9 @@ const double ImageView::ZOOM_MIN = ZOOM_STEPS.front();
 const double ImageView::ZOOM_MAX = ZOOM_STEPS.back();
 
 ImageView::ImageView(BaseObjectType* cobject,
-    const Glib::RefPtr<Gtk::Builder>& builder) : Gtk::ScrolledWindow(cobject) {
-  builder->get_widget("image", image);
+    const Glib::RefPtr<Gtk::Builder>& /*builder*/)
+    : Gtk::ScrolledWindow(cobject) {
+  add(image);
 }
 
 void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
@@ -39,7 +40,7 @@ void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
 
 void ImageView::clear() {
   pixbuf.reset();
-  image->clear();
+  image.clear();
   signal_zoom_changed.emit();
 }
 
@@ -100,7 +101,7 @@ void ImageView::update(const Gtk::Allocation& allocation) {
   zoom_factor = std::max(ZOOM_MIN, std::min(ZOOM_MAX, zoom_factor));
 
   if (zoom_factor != prev_zoom_factor) {
-    image->set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
+    image.set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
           std::round(pixbuf->get_width() * zoom_factor),
           std::round(pixbuf->get_height() * zoom_factor),
           Gdk::INTERP_BILINEAR));

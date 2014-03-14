@@ -78,12 +78,12 @@ class ImageView : public Gtk::ScrolledWindow {
   void update() { update(get_allocation()); }
 
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
-  Gtk::Image* image = nullptr;
+  Gtk::Image image;
 
-  ZoomFit zoom_fit = ZOOM_FIT_BEST;
-  bool zoom_fit_expand = false;
   double zoom_factor = 1.0;
   double prev_zoom_factor = 0.0;  // Helps avoid re-scaling at the same factor.
+  ZoomFit zoom_fit = ZOOM_FIT_BEST;
+  bool zoom_fit_expand = false;
 };
 
 #endif

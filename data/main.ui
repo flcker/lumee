@@ -123,8 +123,10 @@
     <child>
       <object class="GtkGrid" id="grid">
         <child>
-          <object class="GtkScrolledWindow" id="scrolled-window">
+          <object class="GtkScrolledWindow" id="list-scrolled-window">
+            <property name="name">list-scrolled-window</property>
             <property name="min-content-width">119</property>
+            <property name="shadow-type">GTK_SHADOW_IN</property>
             <child>
               <object class="GtkTreeView" id="list-view">
                 <property name="name">list-view</property>

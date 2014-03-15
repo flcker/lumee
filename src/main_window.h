@@ -46,6 +46,10 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Opens a folder with a file chooser dialog.
   void open_file_chooser();
 
+  // Shows thumbnails in the list view.
+  void on_thumbnail_cell_data(Gtk::CellRenderer* cell,
+      const Gtk::TreeIter& iter);
+
   // Loads an image based on the file list's selection.
   void on_selection_changed();
 

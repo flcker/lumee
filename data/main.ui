@@ -138,6 +138,13 @@
                     <property name="mode">GTK_SELECTION_BROWSE</property>
                   </object>
                 </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="thumbnail-column">
+                    <child>
+                      <object class="GtkCellRendererPixbuf" id="thumbnail-cell"/>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

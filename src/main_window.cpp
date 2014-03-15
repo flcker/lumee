@@ -30,22 +30,24 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget_derived("image-view", image_view);
   add_actions();
 
-  settings->signal_changed().connect(
-      sigc::mem_fun(*this, &MainWindow::on_setting_changed));
   list_view->set_model(image_list);
-  list_view->append_column("", image_list->columns.thumbnail);
   list_view->set_tooltip_column(image_list->columns.tooltip.index());
+  list_view->get_column(0)->set_cell_data_func(
+      *list_view->get_column_cell_renderer(0),
+      sigc::mem_fun(*this, &MainWindow::on_thumbnail_cell_data));
   list_view->get_selection()->signal_changed().connect(
       sigc::mem_fun(*this, &MainWindow::on_selection_changed));
   image_view->signal_zoom_changed.connect(
       sigc::mem_fun(*this, &MainWindow::on_zoom_changed));
   image_worker.signal_finished.connect(
       sigc::mem_fun(*this, &MainWindow::on_image_loaded));
+  settings->signal_changed().connect(
+      sigc::mem_fun(*this, &MainWindow::on_setting_changed));
+
   // Call some signal handlers now to initialize them.
   on_zoom_changed();
   on_setting_changed("sort-by");
   on_setting_changed("zoom-to-fit-expand");
-
   if (settings->get_boolean("maximized"))
     maximize();
   show_all_children();
@@ -90,6 +92,18 @@ void MainWindow::open_file_chooser() {
   chooser.set_current_folder(folder_path);
   if (chooser.run() == Gtk::RESPONSE_ACCEPT)
     open(chooser.get_file());
+}
+
+void MainWindow::on_thumbnail_cell_data(Gtk::CellRenderer* cell_base,
+    const Gtk::TreeIter& iter) {
+  auto cell = dynamic_cast<Gtk::CellRendererPixbuf*>(cell_base);
+  Glib::RefPtr<Gdk::Pixbuf> thumbnail = (*iter)[image_list->columns.thumbnail];
+  if (thumbnail)
+    cell->property_pixbuf() = thumbnail;
+  else {  // Thumbnail is still loading.
+    cell->property_icon_name() = "image-loading";
+    cell->property_stock_size() = Gtk::ICON_SIZE_DIALOG;
+  }
 }
 
 void MainWindow::on_selection_changed() {

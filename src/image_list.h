@@ -19,7 +19,6 @@
 
 #include "image_worker.h"
 
-#include <gtkmm/icontheme.h>
 #include <gtkmm/liststore.h>
 
 // A model that stores a list of image files with thumbnails.
@@ -53,10 +52,6 @@ class ImageList : public Gtk::ListStore {
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;
-
-  // TODO: Listen for icon theme changes.
-  const Glib::RefPtr<Gdk::Pixbuf> thumbnail_loading_icon =
-      Gtk::IconTheme::get_default()->load_icon("image-loading", 48)->copy();
 };
 
 #endif  // LUMEE_IMAGE_LIST_H

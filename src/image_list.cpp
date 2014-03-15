@@ -56,7 +56,6 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
     row[columns.display_name] = info->get_display_name();
     row[columns.time_modified] = info->get_attribute_uint64(
         G_FILE_ATTRIBUTE_TIME_MODIFIED);
-    row[columns.thumbnail] = thumbnail_loading_icon;
     row[columns.tooltip] = "<b>" +
         Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
         Glib::Markup::escape_text(Glib::DateTime::create_now_local(

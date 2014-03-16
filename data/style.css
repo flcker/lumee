@@ -8,3 +8,8 @@
 #list-view:selected {
     -GtkWidget-focus-line-width: 0;
 }
+
+#message-area {
+    color: darker(@theme_fg_color);
+    font-size: 120%;
+}

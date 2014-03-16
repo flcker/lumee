@@ -27,7 +27,9 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget("header-bar", header_bar);
   builder->get_widget("zoom-label", zoom_label);
   builder->get_widget("list-view", list_view);
+  builder->get_widget("stack", stack);
   builder->get_widget_derived("image-view", image_view);
+  builder->get_widget("message", message);
   add_actions();
 
   list_view->set_model(image_list);
@@ -120,13 +122,16 @@ void MainWindow::on_selection_changed() {
 }
 
 void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
-  if (task.failed)
+  if (task.failed) {
+    message->set_text(_("Could not load this image"));
+    stack->set_visible_child("message-area");
     image_view->clear();
-  else {
+  } else {
     image_view->set(task.pixbuf);
     // Reset scroll position.
     image_view->get_hadjustment()->set_value(0);
     image_view->get_vadjustment()->set_value(0);
+    stack->set_visible_child(*image_view);
   }
   header_bar->set_subtitle(Glib::filename_display_basename(task.path));
 }

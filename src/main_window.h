@@ -25,6 +25,7 @@
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/headerbar.h>
+#include <gtkmm/stack.h>
 #include <gtkmm/treeview.h>
 
 class MainWindow : public Gtk::ApplicationWindow {
@@ -76,7 +77,9 @@ class MainWindow : public Gtk::ApplicationWindow {
   Gtk::HeaderBar* header_bar = nullptr;
   Gtk::Label* zoom_label = nullptr;
   Gtk::TreeView* list_view = nullptr;
+  Gtk::Stack* stack = nullptr;
   ImageView* image_view = nullptr;
+  Gtk::Label* message = nullptr;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();
   std::string folder_path;

@@ -80,9 +80,9 @@ bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
 void ImageList::on_thumbnail_loaded(const ImageWorker::Task& task) {
   if (task.iter) {
     Gtk::TreeRow row = *task.iter;
-    if (task.failed)
-      row[columns.thumbnail_failed] = true;
-    else
+    if (task.pixbuf)
       row[columns.thumbnail] = task.pixbuf;
+    else
+      row[columns.thumbnail_failed] = true;
   }
 }

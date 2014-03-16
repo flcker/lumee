@@ -54,7 +54,7 @@ void ImageWorker::process(const sigc::slot<void, Task&>& slot, Task& task) {
       return;
     else throw;
   } catch (const Glib::Error&) {
-    task.failed = true;
+    task.pixbuf.reset();
   }
   {
     Glib::Threads::Mutex::Lock lock(mutex);

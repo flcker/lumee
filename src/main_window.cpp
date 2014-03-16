@@ -122,16 +122,16 @@ void MainWindow::on_selection_changed() {
 }
 
 void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
-  if (task.failed) {
-    message->set_text(_("Could not load this image"));
-    stack->set_visible_child("message-area");
-    image_view->clear();
-  } else {
+  if (task.pixbuf) {
     image_view->set(task.pixbuf);
     // Reset scroll position.
     image_view->get_hadjustment()->set_value(0);
     image_view->get_vadjustment()->set_value(0);
     stack->set_visible_child(*image_view);
+  } else {
+    message->set_text(_("Could not load this image"));
+    stack->set_visible_child("message-area");
+    image_view->clear();
   }
   header_bar->set_subtitle(Glib::filename_display_basename(task.path));
 }

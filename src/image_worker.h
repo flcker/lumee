@@ -45,8 +45,8 @@ class ImageWorker {
     // there's a cleaner way to store this.
     Gtk::TreeIter iter;
 
-    // Result of the task after being processed.
-    bool failed = false;
+    // Result of the task after being processed. If it failed, 'pixbuf' will be
+    // an empty pointer.
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
   };
 

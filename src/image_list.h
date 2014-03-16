@@ -29,10 +29,11 @@ class ImageList : public Gtk::ListStore {
     Gtk::TreeModelColumn<Glib::ustring> display_name;
     Gtk::TreeModelColumn<guint64> time_modified;
     Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thumbnail;
+    Gtk::TreeModelColumn<bool> thumbnail_failed;
     Gtk::TreeModelColumn<Glib::ustring> tooltip;
 
     Columns() { add(path); add(display_name); add(time_modified);
-      add(thumbnail); add(tooltip); }
+      add(thumbnail); add(thumbnail_failed); add(tooltip); }
   };
 
   ImageList();

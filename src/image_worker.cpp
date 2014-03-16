@@ -53,6 +53,8 @@ void ImageWorker::process(const sigc::slot<void, Task&>& slot, Task& task) {
     if (error.code() == Gio::Error::CANCELLED)
       return;
     else throw;
+  } catch (const Glib::Error&) {
+    task.failed = true;
   }
   {
     Glib::Threads::Mutex::Lock lock(mutex);

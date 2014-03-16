@@ -141,7 +141,9 @@
                 <child>
                   <object class="GtkTreeViewColumn" id="thumbnail-column">
                     <child>
-                      <object class="GtkCellRendererPixbuf" id="thumbnail-cell"/>
+                      <object class="GtkCellRendererPixbuf" id="thumbnail-cell">
+                        <property name="stock-size">6</property>
+                      </object>
                     </child>
                   </object>
                 </child>

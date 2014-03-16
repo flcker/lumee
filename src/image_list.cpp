@@ -56,6 +56,7 @@ void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
     row[columns.display_name] = info->get_display_name();
     row[columns.time_modified] = info->get_attribute_uint64(
         G_FILE_ATTRIBUTE_TIME_MODIFIED);
+    row[columns.thumbnail_failed] = false;
     row[columns.tooltip] = "<b>" +
         Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
         Glib::Markup::escape_text(Glib::DateTime::create_now_local(
@@ -79,6 +80,9 @@ bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
 void ImageList::on_thumbnail_loaded(const ImageWorker::Task& task) {
   if (task.iter) {
     Gtk::TreeRow row = *task.iter;
-    row[columns.thumbnail] = task.pixbuf;
+    if (task.failed)
+      row[columns.thumbnail_failed] = true;
+    else
+      row[columns.thumbnail] = task.pixbuf;
   }
 }

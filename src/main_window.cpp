@@ -94,16 +94,18 @@ void MainWindow::open_file_chooser() {
     open(chooser.get_file());
 }
 
+// In addition to showing a thumbnail, thumbnail cells can be in a "failed" or
+// "loading" state.
 void MainWindow::on_thumbnail_cell_data(Gtk::CellRenderer* cell_base,
     const Gtk::TreeIter& iter) {
   auto cell = dynamic_cast<Gtk::CellRendererPixbuf*>(cell_base);
   Glib::RefPtr<Gdk::Pixbuf> thumbnail = (*iter)[image_list->columns.thumbnail];
-  if (thumbnail)
-    cell->property_pixbuf() = thumbnail;
-  else {  // Thumbnail is still loading.
+  if ((*iter)[image_list->columns.thumbnail_failed])
+    cell->property_icon_name() = "image-x-generic";
+  else if (!thumbnail)
     cell->property_icon_name() = "image-loading";
-    cell->property_stock_size() = Gtk::ICON_SIZE_DIALOG;
-  }
+  else
+    cell->property_pixbuf() = thumbnail;
 }
 
 void MainWindow::on_selection_changed() {
@@ -118,11 +120,15 @@ void MainWindow::on_selection_changed() {
 }
 
 void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
-  image_view->set(task.pixbuf);
+  if (task.failed)
+    image_view->clear();
+  else {
+    image_view->set(task.pixbuf);
+    // Reset scroll position.
+    image_view->get_hadjustment()->set_value(0);
+    image_view->get_vadjustment()->set_value(0);
+  }
   header_bar->set_subtitle(Glib::filename_display_basename(task.path));
-  // Reset scroll position.
-  image_view->get_hadjustment()->set_value(0);
-  image_view->get_vadjustment()->set_value(0);
 }
 
 void MainWindow::on_setting_changed(const Glib::ustring& key) {

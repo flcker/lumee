@@ -46,6 +46,7 @@ class ImageWorker {
     Gtk::TreeIter iter;
 
     // Result of the task after being processed.
+    bool failed = false;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
   };
 

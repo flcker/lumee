@@ -68,6 +68,7 @@
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header-bar">
         <property name="show-close-button">true</property>
+        <property name="subtitle"/>  <!-- Reserve room for the subtitle. -->
         <child>
           <object class="GtkButton" id="open-button">
             <property name="action-name">win.open</property>
@@ -164,9 +165,8 @@
                 <property name="halign">GTK_ALIGN_CENTER</property>
                 <child>
                   <object class="GtkImage" id="message-icon">
-                    <property name="icon-name">emblem-important-symbolic</property>
                     <property name="icon-size">5</property>
-                    <property name="margin-right">5</property>
+                    <property name="margin-right">10</property>
                   </object>
                 </child>
                 <child>

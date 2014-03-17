@@ -57,6 +57,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Shows an image that has finished loading.
   void on_image_loaded(const ImageWorker::Task& task);
 
+  void on_folder_opened(bool success);
   void on_setting_changed(const Glib::ustring& key);
 
   // Handlers for zoom actions.
@@ -67,6 +68,10 @@ class MainWindow : public Gtk::ApplicationWindow {
   void on_zoom_changed();
 
   void sort(const Glib::ustring& mode, bool reversed);
+
+  // Shows a message in the center of the window.
+  void show_message(const Glib::ustring& text,
+      const Glib::ustring& icon_name = "emblem-important-symbolic");
 
   Glib::RefPtr<Gio::Settings> settings = Gio::Settings::create(
       "com.github.bmars.Lumee");
@@ -79,6 +84,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   Gtk::TreeView* list_view = nullptr;
   Gtk::Stack* stack = nullptr;
   ImageView* image_view = nullptr;
+  Gtk::Image* message_icon = nullptr;
   Gtk::Label* message = nullptr;
 
   Glib::RefPtr<ImageList> image_list = ImageList::create();

@@ -46,6 +46,11 @@ class ImageList : public Gtk::ListStore {
 
   const Columns columns;
 
+  // Slot prototype: void on_my_folder_opened(bool success)
+  //
+  // Emitted when a folder has finished being opened, successfully or not.
+  sigc::signal<void, bool> signal_folder_opened;
+
  private:
   // Data used while asynchronously opening a folder.
   struct AsyncData {

@@ -29,6 +29,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   builder->get_widget("list-view", list_view);
   builder->get_widget("stack", stack);
   builder->get_widget_derived("image-view", image_view);
+  builder->get_widget("message-icon", message_icon);
   builder->get_widget("message", message);
   add_actions();
 
@@ -41,6 +42,8 @@ MainWindow::MainWindow(BaseObjectType* cobject,
       sigc::mem_fun(*this, &MainWindow::on_selection_changed));
   image_view->signal_zoom_changed.connect(
       sigc::mem_fun(*this, &MainWindow::on_zoom_changed));
+  image_list->signal_folder_opened.connect(
+      sigc::mem_fun(*this, &MainWindow::on_folder_opened));
   image_worker.signal_finished.connect(
       sigc::mem_fun(*this, &MainWindow::on_image_loaded));
   settings->signal_changed().connect(
@@ -56,6 +59,7 @@ MainWindow::MainWindow(BaseObjectType* cobject,
 }
 
 void MainWindow::open(const Glib::RefPtr<Gio::File>& folder) {
+  list_view->get_selection()->unselect_all();
   image_list->open_folder(folder);
   folder_path = folder->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
@@ -117,6 +121,7 @@ void MainWindow::on_selection_changed() {
     image_worker.load((*iter)[image_list->columns.path]);
   else {  // No selection.
     image_view->clear();
+    stack->set_visible_child(*image_view);
     header_bar->set_subtitle("");
   }
 }
@@ -129,11 +134,24 @@ void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
     image_view->get_vadjustment()->set_value(0);
     stack->set_visible_child(*image_view);
   } else {
-    message->set_text(_("Could not load this image"));
-    stack->set_visible_child("message-area");
+    show_message(_("Could not load this image"));
     image_view->clear();
   }
   header_bar->set_subtitle(Glib::filename_display_basename(task.path));
+}
+
+void MainWindow::on_folder_opened(bool success) {
+  if (success) {
+    if (image_list->children().size()) {
+      // Select the first image and scroll to the top if there is no selection.
+      if (!list_view->get_selection()->get_selected()) {
+        list_view->get_selection()->select(Gtk::TreePath("0"));
+        list_view->get_vadjustment()->set_value(0);
+      }
+    } else
+      show_message(_("No images in this folder"), "emblem-photos-symbolic");
+  } else
+    show_message(_("Could not open this folder"));
 }
 
 void MainWindow::on_setting_changed(const Glib::ustring& key) {
@@ -180,4 +198,11 @@ void MainWindow::sort(const Glib::ustring& mode, bool reversed) {
     image_list->set_sort_column(image_list->columns.display_name, order);
   else if (mode == "modification-date")
     image_list->set_sort_column(image_list->columns.time_modified, order);
+}
+
+void MainWindow::show_message(const Glib::ustring& text,
+    const Glib::ustring& icon_name) {
+  message_icon->property_icon_name() = icon_name;
+  message->set_text(text);
+  stack->set_visible_child("message-area");
 }

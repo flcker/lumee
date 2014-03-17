@@ -65,10 +65,16 @@ Glib::RefPtr<ImageList> ImageList::create() {
 // Gets the enumerator and starts the file loop.
 void ImageList::on_enumerate_children(
     const Glib::RefPtr<Gio::AsyncResult>& result, AsyncData& data) {
-  data.enumerator = data.folder->enumerate_children_finish(result);
+  try {
+    data.enumerator = data.folder->enumerate_children_finish(result);
+  } catch (const Gio::Error& error) {
+    if (error.code() != Gio::Error::CANCELLED)
+      signal_folder_opened.emit(false);
+    return;
+  }
   data.enumerator->next_files_async(
       sigc::bind(sigc::mem_fun(*this, &ImageList::on_next_files), data),
-      data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_DEFAULT_IDLE);
+      data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_HIGH_IDLE);
 }
 
 // Appends all the images in this chunk of files.
@@ -78,9 +84,9 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
   try {
     files = data.enumerator->next_files_finish(result);
   } catch (const Gio::Error& error) {
-    if (error.code() == Gio::Error::CANCELLED)
-      return;
-    else throw;
+    if (error.code() != Gio::Error::CANCELLED)
+      signal_folder_opened.emit(false);
+    return;
   }
 
   for (Glib::RefPtr<Gio::FileInfo> info : files)
@@ -90,7 +96,9 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
   if (files.size())  // Recurse until there are no more files.
     data.enumerator->next_files_async(
         sigc::bind(sigc::mem_fun(*this, &ImageList::on_next_files), data),
-        data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_DEFAULT_IDLE);
+        data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_HIGH_IDLE);
+  else
+    signal_folder_opened.emit(true);
 }
 
 void ImageList::append_image(const std::string& folder_path,

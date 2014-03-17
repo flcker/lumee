@@ -17,12 +17,18 @@
 #include "image_list.h"
 
 #include <giomm/file.h>
-#include <giomm/fileenumerator.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/markup.h>
 #include <glibmm/miscutils.h>
 
 const int ImageList::THUMBNAIL_SIZE = 96;
+const int ImageList::ASYNC_NUM_FILES = 100;
+const std::string ImageList::FILE_ATTRIBUTES =
+    G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
+    G_FILE_ATTRIBUTE_STANDARD_NAME ","
+    G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
+    G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE ","
+    G_FILE_ATTRIBUTE_TIME_MODIFIED;
 
 ImageList::ImageList() {
   // Build a list of supported image MIME types.
@@ -31,38 +37,22 @@ ImageList::ImageList() {
     supported_mime_types.insert(end(supported_mime_types), begin(mime_types),
         end(mime_types));
   }
-
   image_worker.signal_finished.connect(sigc::mem_fun(*this,
         &ImageList::on_thumbnail_loaded));
 }
 
-// TODO: Make this async.
 void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
-  Glib::RefPtr<Gio::FileEnumerator> enumerator = folder->enumerate_children(
-      G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
-      G_FILE_ATTRIBUTE_STANDARD_NAME ","
-      G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
-      G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE ","
-      G_FILE_ATTRIBUTE_TIME_MODIFIED);
-  image_worker.cancel_all();  // Cancel everything from the previous folder.
+  // Cancel everything from the previous folder.
+  if (cancellable)
+    cancellable->cancel();
+  image_worker.cancel_all();
   clear();
-  while (Glib::RefPtr<Gio::FileInfo> info = enumerator->next_file()) {
-    if (info->is_hidden() || !is_supported_mime_type(info->get_content_type()))
-      continue;
-    Gtk::TreeIter iter = append();
-    Gtk::TreeRow row = *iter;
-    row[columns.path] = Glib::build_filename(folder->get_path(),
-        info->get_name());
-    row[columns.display_name] = info->get_display_name();
-    row[columns.time_modified] = info->get_attribute_uint64(
-        G_FILE_ATTRIBUTE_TIME_MODIFIED);
-    row[columns.thumbnail_failed] = false;
-    row[columns.tooltip] = "<b>" +
-        Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
-        Glib::Markup::escape_text(Glib::DateTime::create_now_local(
-            row[columns.time_modified]).format("%c"));
-    image_worker.load(row[columns.path], THUMBNAIL_SIZE, iter);
-  }
+
+  AsyncData data = AsyncData(folder);
+  cancellable = data.cancellable;
+  folder->enumerate_children_async(sigc::bind(
+        sigc::mem_fun(*this, &ImageList::on_enumerate_children), data),
+      cancellable, FILE_ATTRIBUTES);
 }
 
 // static
@@ -70,6 +60,53 @@ Glib::RefPtr<ImageList> ImageList::create() {
   Glib::RefPtr<ImageList> model(new ImageList());
   model->set_column_types(model->columns);
   return model;
+}
+
+// Gets the enumerator and starts the file loop.
+void ImageList::on_enumerate_children(
+    const Glib::RefPtr<Gio::AsyncResult>& result, AsyncData& data) {
+  data.enumerator = data.folder->enumerate_children_finish(result);
+  data.enumerator->next_files_async(
+      sigc::bind(sigc::mem_fun(*this, &ImageList::on_next_files), data),
+      data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_DEFAULT_IDLE);
+}
+
+// Appends all the images in this chunk of files.
+void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
+    const AsyncData& data) {
+  std::vector<Glib::RefPtr<Gio::FileInfo>> files;
+  try {
+    files = data.enumerator->next_files_finish(result);
+  } catch (const Gio::Error& error) {
+    if (error.code() == Gio::Error::CANCELLED)
+      return;
+    else throw;
+  }
+
+  for (Glib::RefPtr<Gio::FileInfo> info : files)
+    if (!info->is_hidden() && is_supported_mime_type(info->get_content_type()))
+      append_image(data.folder->get_path(), info);
+
+  if (files.size())  // Recurse until there are no more files.
+    data.enumerator->next_files_async(
+        sigc::bind(sigc::mem_fun(*this, &ImageList::on_next_files), data),
+        data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_DEFAULT_IDLE);
+}
+
+void ImageList::append_image(const std::string& folder_path,
+    const Glib::RefPtr<Gio::FileInfo>& info) {
+  Gtk::TreeIter iter = append();
+  Gtk::TreeRow row = *iter;
+  row[columns.path] = Glib::build_filename(folder_path, info->get_name());
+  row[columns.display_name] = info->get_display_name();
+  row[columns.time_modified] = info->get_attribute_uint64(
+      G_FILE_ATTRIBUTE_TIME_MODIFIED);
+  row[columns.thumbnail_failed] = false;
+  row[columns.tooltip] = "<b>" +
+      Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
+      Glib::Markup::escape_text(Glib::DateTime::create_now_local(
+          row[columns.time_modified]).format("%c"));
+  image_worker.load(row[columns.path], THUMBNAIL_SIZE, iter);
 }
 
 bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {

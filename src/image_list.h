@@ -19,6 +19,7 @@
 
 #include "image_worker.h"
 
+#include <giomm/fileenumerator.h>
 #include <gtkmm/liststore.h>
 
 // A model that stores a list of image files with thumbnails.
@@ -46,13 +47,35 @@ class ImageList : public Gtk::ListStore {
   const Columns columns;
 
  private:
+  // Data used while asynchronously opening a folder.
+  struct AsyncData {
+    AsyncData(const Glib::RefPtr<Gio::File>& folder) : folder(folder) {}
+
+    Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
+    Glib::RefPtr<Gio::File> folder;
+    Glib::RefPtr<Gio::FileEnumerator> enumerator;
+  };
+
   static const int THUMBNAIL_SIZE;
+  static const int ASYNC_NUM_FILES;
+  static const std::string FILE_ATTRIBUTES;
+
+  // Handlers for asynchronously opening a folder.
+  void on_enumerate_children(const Glib::RefPtr<Gio::AsyncResult>& result,
+      AsyncData& data);
+  void on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
+      const AsyncData& data);
+
+  // Appends an image file to the list.
+  void append_image(const std::string& folder_path,
+      const Glib::RefPtr<Gio::FileInfo>& info);
 
   bool is_supported_mime_type(const Glib::ustring& mime_type);
   void on_thumbnail_loaded(const ImageWorker::Task& task);
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;
+  Glib::RefPtr<Gio::Cancellable> cancellable;
 };
 
 #endif  // LUMEE_IMAGE_LIST_H

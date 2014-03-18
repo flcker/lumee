@@ -18,6 +18,7 @@
 
 #include <giomm/menu.h>
 #include <glibmm/i18n.h>
+#include <glibmm/optioncontext.h>
 #include <glibmm/miscutils.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/cssprovider.h>
@@ -38,6 +39,37 @@ Application::Application()
     : Gtk::Application("com.github.bmars.Lumee",
         Gio::APPLICATION_HANDLES_OPEN |
         Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
+
+// Returns true to exit without starting the application, false to continue.
+bool Application::local_command_line_vfunc(char**& argv, int& exit_status) {
+  Glib::OptionContext context("[FOLDER]");
+  Glib::OptionGroup group("", "");
+  Glib::OptionGroup group_gtk(gtk_get_option_group(true));
+  context.set_main_group(group);
+  context.add_group(group_gtk);
+
+  bool show_version = false;
+  Glib::OptionEntry entry_version;
+  entry_version.set_long_name("version");
+  entry_version.set_description(_("Show the version number"));
+  group.add_entry(entry_version, show_version);
+
+  int argc = g_strv_length(argv);
+  try {
+    context.parse(argc, argv);
+  } catch (const Glib::OptionError& error) {
+    std::cerr << argv[0] << ": " << error.what() << std::endl;
+    std::cerr << Glib::ustring::compose(_("Try '%1' for more information."),
+        std::string(argv[0]) + " --help") << std::endl;
+    exit_status = EXIT_FAILURE;
+    return true;
+  }
+  if (show_version) {
+    std::cout << PACKAGE_NAME << " " << PACKAGE_VERSION << std::endl;
+    return true;
+  }
+  return false;
+}
 
 void Application::on_startup() {
   Gtk::Application::on_startup();

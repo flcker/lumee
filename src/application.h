@@ -26,10 +26,13 @@
 class Application : public Gtk::Application {
  public:
   virtual ~Application();
+
   static Glib::RefPtr<Application> create();
 
  protected:
   Application();
+
+  virtual bool local_command_line_vfunc(char**& argv, int& exit_status);
   virtual void on_startup();
   virtual int on_command_line(
       const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line);

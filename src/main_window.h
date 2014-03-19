@@ -1,18 +1,17 @@
-/* Copyright (C) 2014 Brian Marshall
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright (C) 2014 Brian Marshall
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef LUMEE_MAIN_WINDOW_H
 #define LUMEE_MAIN_WINDOW_H
@@ -31,7 +30,7 @@
 class MainWindow : public Gtk::ApplicationWindow {
  public:
   MainWindow(BaseObjectType* cobject,
-      const Glib::RefPtr<Gtk::Builder>& builder);
+             const Glib::RefPtr<Gtk::Builder>& builder);
 
   // Opens a folder. If given a file, opens its containing folder.
   void open(Glib::RefPtr<Gio::File> file);
@@ -49,7 +48,7 @@ class MainWindow : public Gtk::ApplicationWindow {
 
   // Shows thumbnails in the list view.
   void on_thumbnail_cell_data(Gtk::CellRenderer* cell,
-      const Gtk::TreeIter& iter);
+                              const Gtk::TreeIter& iter);
 
   // Loads an image based on the file list's selection.
   void on_selection_changed();
@@ -60,7 +59,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Handler for when opening a folder has completed. Selects 'file_to_select'
   // in the list, if valid.
   void on_folder_ready(bool success,
-      const Glib::RefPtr<Gio::File>& file_to_select);
+                       const Glib::RefPtr<Gio::File>& file_to_select);
 
   void on_setting_changed(const Glib::ustring& key);
 
@@ -74,7 +73,8 @@ class MainWindow : public Gtk::ApplicationWindow {
   void sort(const Glib::ustring& mode, bool reversed);
 
   // Shows a message in the center of the window.
-  void show_message(const Glib::ustring& text,
+  void show_message(
+      const Glib::ustring& text,
       const Glib::ustring& icon_name = "emblem-important-symbolic");
 
   Glib::RefPtr<Gio::Settings> settings = Gio::Settings::create(

@@ -1,18 +1,17 @@
-/* Copyright (C) 2014 Brian Marshall
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright (C) 2014 Brian Marshall
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "application.h"
 
@@ -37,8 +36,8 @@ Glib::RefPtr<Application> Application::create() {
 
 Application::Application()
     : Gtk::Application("com.github.bmars.Lumee",
-        Gio::APPLICATION_HANDLES_OPEN |
-        Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
+                       Gio::APPLICATION_HANDLES_OPEN |
+                       Gio::APPLICATION_HANDLES_COMMAND_LINE) {}
 
 // Returns true to exit without starting the application, false to continue.
 bool Application::local_command_line_vfunc(char**& argv, int& exit_status) {
@@ -58,9 +57,10 @@ bool Application::local_command_line_vfunc(char**& argv, int& exit_status) {
   try {
     context.parse(argc, argv);
   } catch (const Glib::OptionError& error) {
-    std::cerr << argv[0] << ": " << error.what() << std::endl;
-    std::cerr << Glib::ustring::compose(_("Try '%1' for more information."),
-        std::string(argv[0]) + " --help") << std::endl;
+    std::cerr << argv[0] << ": " << error.what() << std::endl
+              << Glib::ustring::compose(_("Try '%1' for more information."),
+                                        std::string(argv[0]) + " --help")
+              << std::endl;
     exit_status = EXIT_FAILURE;
     return true;
   }
@@ -107,14 +107,14 @@ int Application::on_command_line(
     open(command_line->create_file_for_arg(argv[1]));
   else if (!command_line->is_remote())
     open(Gio::File::create_for_path(Glib::get_user_special_dir(
-            G_USER_DIRECTORY_PICTURES)));
+        G_USER_DIRECTORY_PICTURES)));
   g_strfreev(argv);
   main_window->present();
   return EXIT_SUCCESS;
 }
 
 void Application::on_open(const type_vec_files& files,
-    const Glib::ustring& /*hint*/) {
+                          const Glib::ustring& /*hint*/) {
   main_window->open(files[0]);
 }
 
@@ -123,15 +123,16 @@ void Application::load_ui() {
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
   builder->add_from_file(Glib::build_filename(data_dir, "app_menu.ui"));
   set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
-          "app-menu")));
+      "app-menu")));
   builder->add_from_file(Glib::build_filename(data_dir, "main.ui"));
   builder->get_widget_derived("main-window", main_window);
   add_window(*main_window);
 
   Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
   css_provider->load_from_path(Glib::build_filename(data_dir, "style.css"));
-  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
-      css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  Gtk::StyleContext::add_provider_for_screen(
+      Gdk::Screen::get_default(), css_provider,
+      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 // Keeps only one instance of the dialog and constructs/destructs it as needed.
@@ -146,8 +147,9 @@ void Application::show_about_dialog() {
     about_dialog->set_copyright("Copyright © 2014 Brian Marshall");
     about_dialog->set_license_type(Gtk::LICENSE_GPL_3_0);
     about_dialog->set_modal();
-    about_dialog->signal_response().connect([this](int /*response_id*/)
-        { about_dialog.reset(); });  // Reset pointer to destroy the dialog.
+    // Destroy the dialog when the close button is clicked.
+    about_dialog->signal_response().connect(
+        [this](int /*response_id*/) { about_dialog.reset(); });
   }
   about_dialog->set_transient_for(*get_active_window());
   about_dialog->present();

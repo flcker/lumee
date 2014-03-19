@@ -1,18 +1,17 @@
-/* Copyright (C) 2014 Brian Marshall
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright (C) 2014 Brian Marshall
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "image_worker.h"
 #include "utils.h"
@@ -31,10 +30,10 @@ ImageWorker::~ImageWorker() {
 }
 
 void ImageWorker::load(const std::string& path, int scale_size,
-    const Gtk::TreeIter& iter) {
+                       const Gtk::TreeIter& iter) {
   work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
-        sigc::mem_fun(*this, &ImageWorker::do_load),
-        Task(path, scale_size, iter)));
+                             sigc::mem_fun(*this, &ImageWorker::do_load),
+                             Task(path, scale_size, iter)));
 }
 
 // Because the cancellable is reset before each task, clear() needs to run
@@ -74,9 +73,10 @@ void ImageWorker::do_load(Task& task) {
 
   if (task.scale_size) {
     double factor = scale_to_fit(task.scale_size, task.scale_size,
-        pixbuf->get_width(), pixbuf->get_height());
+                                 pixbuf->get_width(), pixbuf->get_height());
     pixbuf = pixbuf->scale_simple(std::round(pixbuf->get_width() * factor),
-        std::round(pixbuf->get_height() * factor), Gdk::INTERP_BILINEAR);
+                                  std::round(pixbuf->get_height() * factor),
+                                  Gdk::INTERP_BILINEAR);
     if (cancellable->is_cancelled())
       throw Gio::Error(Gio::Error::CANCELLED, "");
   }

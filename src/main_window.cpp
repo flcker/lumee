@@ -1,18 +1,17 @@
-/* Copyright (C) 2014 Brian Marshall
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright (C) 2014 Brian Marshall
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "main_window.h"
 #include "utils.h"
@@ -22,7 +21,7 @@
 #include <gtkmm/filechooserdialog.h>
 
 MainWindow::MainWindow(BaseObjectType* cobject,
-    const Glib::RefPtr<Gtk::Builder>& builder)
+                       const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject) {
   builder->get_widget("header-bar", header_bar);
   builder->get_widget("zoom-label", zoom_label);
@@ -38,14 +37,14 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   list_view->get_column(0)->set_cell_data_func(
       *list_view->get_column_cell_renderer(0),
       sigc::mem_fun(*this, &MainWindow::on_thumbnail_cell_data));
-  list_view->get_selection()->signal_changed().connect(
-      sigc::mem_fun(*this, &MainWindow::on_selection_changed));
-  image_view->signal_zoom_changed.connect(
-      sigc::mem_fun(*this, &MainWindow::on_zoom_changed));
-  image_worker.signal_finished.connect(
-      sigc::mem_fun(*this, &MainWindow::on_image_loaded));
-  settings->signal_changed().connect(
-      sigc::mem_fun(*this, &MainWindow::on_setting_changed));
+  list_view->get_selection()->signal_changed().connect(sigc::mem_fun(
+      *this, &MainWindow::on_selection_changed));
+  image_view->signal_zoom_changed.connect(sigc::mem_fun(
+      *this, &MainWindow::on_zoom_changed));
+  image_worker.signal_finished.connect(sigc::mem_fun(
+      *this, &MainWindow::on_image_loaded));
+  settings->signal_changed().connect(sigc::mem_fun(
+      *this, &MainWindow::on_setting_changed));
 
   // Call some signal handlers now to initialize them.
   on_zoom_changed();
@@ -65,33 +64,36 @@ void MainWindow::open(Glib::RefPtr<Gio::File> file) {
   }
 
   list_view->get_selection()->unselect_all();
-  image_list->open_folder(sigc::bind(
-        sigc::mem_fun(*this, &MainWindow::on_folder_ready), file_to_select),
-      file);
+  image_list->open_folder(sigc::bind(sigc::mem_fun(
+      *this, &MainWindow::on_folder_ready), file_to_select), file);
   folder_path = file->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
 
 bool MainWindow::on_window_state_event(GdkEventWindowState* event) {
   if (event->changed_mask & GDK_WINDOW_STATE_MAXIMIZED)
-    settings->set_boolean("maximized",
-        event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED);
+    settings->set_boolean(
+        "maximized", event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED);
   return Gtk::ApplicationWindow::on_window_state_event(event);
 }
 
 void MainWindow::add_actions() {
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
-  action_zoom_in = add_action("zoom-in",
-      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), true));
-  action_zoom_in_no_step = add_action("zoom-in-no-step",
+  action_zoom_in = add_action(
+      "zoom-in", sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), true));
+  action_zoom_in_no_step = add_action(
+      "zoom-in-no-step",
       sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), false));
-  action_zoom_out = add_action("zoom-out",
+  action_zoom_out = add_action(
+      "zoom-out",
       sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_out), true));
-  action_zoom_out_no_step = add_action("zoom-out-no-step",
+  action_zoom_out_no_step = add_action(
+      "zoom-out-no-step",
       sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_out), false));
   add_action("zoom-normal", sigc::mem_fun(*this, &MainWindow::zoom_normal));
-  action_zoom_to_fit = add_action_radio_string("zoom-to-fit",
-      sigc::mem_fun(*this, &MainWindow::zoom_to_fit), "fit-best");
+  action_zoom_to_fit = add_action_radio_string(
+      "zoom-to-fit", sigc::mem_fun(*this, &MainWindow::zoom_to_fit),
+      "fit-best");
   action_zoom_to_fit_expand = settings->create_action("zoom-to-fit-expand");
   add_action(settings->create_action("sort-by"));
   add_action(settings->create_action("sort-reversed"));
@@ -99,7 +101,7 @@ void MainWindow::add_actions() {
 
 void MainWindow::open_file_chooser() {
   Gtk::FileChooserDialog chooser(*this, _("Open Folder"),
-      Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+                                 Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
   chooser.add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
   chooser.add_button(_("_Open"), Gtk::RESPONSE_ACCEPT);
   chooser.set_current_folder(folder_path);
@@ -110,7 +112,7 @@ void MainWindow::open_file_chooser() {
 // In addition to showing a thumbnail, thumbnail cells can be in a "failed" or
 // "loading" state.
 void MainWindow::on_thumbnail_cell_data(Gtk::CellRenderer* cell_base,
-    const Gtk::TreeIter& iter) {
+                                        const Gtk::TreeIter& iter) {
   auto cell = dynamic_cast<Gtk::CellRendererPixbuf*>(cell_base);
   Glib::RefPtr<Gdk::Pixbuf> thumbnail = (*iter)[image_list->columns.thumbnail];
   if ((*iter)[image_list->columns.thumbnail_failed])
@@ -147,8 +149,8 @@ void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
   header_bar->set_subtitle(Glib::filename_display_basename(task.path));
 }
 
-void MainWindow::on_folder_ready(bool success,
-    const Glib::RefPtr<Gio::File>& file_to_select) {
+void MainWindow::on_folder_ready(
+    bool success, const Glib::RefPtr<Gio::File>& file_to_select) {
   if (!success)
     show_message(_("Could not open this folder"));
   else if (!image_list->children().size())
@@ -170,7 +172,7 @@ void MainWindow::on_folder_ready(bool success,
 void MainWindow::on_setting_changed(const Glib::ustring& key) {
   if (key == "sort-by" || key == "sort-reversed")
     sort(settings->get_string("sort-by"),
-        settings->get_boolean("sort-reversed"));
+         settings->get_boolean("sort-reversed"));
   else if (key == "zoom-to-fit-expand")
     image_view->zoom_to_fit_expand(settings->get_boolean(key));
 }
@@ -214,7 +216,7 @@ void MainWindow::sort(const Glib::ustring& mode, bool reversed) {
 }
 
 void MainWindow::show_message(const Glib::ustring& text,
-    const Glib::ustring& icon_name) {
+                              const Glib::ustring& icon_name) {
   message_icon->property_icon_name() = icon_name;
   message->set_text(text);
   stack->set_visible_child("message-area");

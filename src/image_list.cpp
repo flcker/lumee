@@ -1,18 +1,17 @@
-/* Copyright (C) 2014 Brian Marshall
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright (C) 2014 Brian Marshall
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "image_list.h"
 
@@ -35,14 +34,14 @@ ImageList::ImageList() {
   for (Gdk::PixbufFormat format : Gdk::Pixbuf::get_formats()) {
     std::vector<Glib::ustring> mime_types = format.get_mime_types();
     supported_mime_types.insert(end(supported_mime_types), begin(mime_types),
-        end(mime_types));
+                                end(mime_types));
   }
-  image_worker.signal_finished.connect(sigc::mem_fun(*this,
-        &ImageList::on_thumbnail_loaded));
+  image_worker.signal_finished.connect(sigc::mem_fun(
+      *this, &ImageList::on_thumbnail_loaded));
 }
 
 void ImageList::open_folder(const SlotFolderReady& slot,
-    const Glib::RefPtr<Gio::File>& folder) {
+                            const Glib::RefPtr<Gio::File>& folder) {
   // Cancel everything from the previous folder.
   if (cancellable)
     cancellable->cancel();
@@ -51,9 +50,9 @@ void ImageList::open_folder(const SlotFolderReady& slot,
 
   AsyncFolderData data(slot, folder);
   cancellable = data.cancellable;
-  folder->enumerate_children_async(sigc::bind(
-        sigc::mem_fun(*this, &ImageList::on_enumerate_children), data),
-      cancellable, FILE_ATTRIBUTES);
+  folder->enumerate_children_async(
+      sigc::bind(sigc::mem_fun(*this, &ImageList::on_enumerate_children),
+                 data), cancellable, FILE_ATTRIBUTES);
 }
 
 ImageList::iterator ImageList::find(const std::string& path) {
@@ -87,7 +86,7 @@ void ImageList::on_enumerate_children(
 
 // Appends all the images in this chunk of files.
 void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
-    const AsyncFolderData& data) {
+                              const AsyncFolderData& data) {
   std::vector<Glib::RefPtr<Gio::FileInfo>> files;
   try {
     files = data.enumerator->next_files_finish(result);
@@ -96,7 +95,6 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
       data.slot_folder_ready(false);
     return;
   }
-
   for (Glib::RefPtr<Gio::FileInfo> info : files)
     if (!info->is_hidden() && is_supported_mime_type(info->get_content_type()))
       append_image(data.folder->get_path(), info);
@@ -110,7 +108,7 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
 }
 
 void ImageList::append_image(const std::string& folder_path,
-    const Glib::RefPtr<Gio::FileInfo>& info) {
+                             const Glib::RefPtr<Gio::FileInfo>& info) {
   Gtk::TreeIter iter = append();
   Gtk::TreeRow row = *iter;
   row[columns.path] = Glib::build_filename(folder_path, info->get_name());
@@ -127,7 +125,7 @@ void ImageList::append_image(const std::string& folder_path,
 
 bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
   return std::find(begin(supported_mime_types), end(supported_mime_types),
-      mime_type) != end(supported_mime_types);
+                   mime_type) != end(supported_mime_types);
 }
 
 void ImageList::on_thumbnail_loaded(const ImageWorker::Task& task) {

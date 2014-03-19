@@ -33,8 +33,8 @@ class MainWindow : public Gtk::ApplicationWindow {
   MainWindow(BaseObjectType* cobject,
       const Glib::RefPtr<Gtk::Builder>& builder);
 
-  // Opens a folder.
-  void open(const Glib::RefPtr<Gio::File>& folder);
+  // Opens a folder. If given a file, opens its containing folder.
+  void open(Glib::RefPtr<Gio::File> file);
 
  protected:
   // Saves the window's maximized state to a setting.
@@ -57,7 +57,11 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Shows an image that has finished loading.
   void on_image_loaded(const ImageWorker::Task& task);
 
-  void on_folder_opened(bool success);
+  // Handler for when opening a folder has completed. Selects 'file_to_select'
+  // in the list, if valid.
+  void on_folder_ready(bool success,
+      const Glib::RefPtr<Gio::File>& file_to_select);
+
   void on_setting_changed(const Glib::ustring& key);
 
   // Handlers for zoom actions.

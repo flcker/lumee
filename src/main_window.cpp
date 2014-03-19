@@ -42,8 +42,6 @@ MainWindow::MainWindow(BaseObjectType* cobject,
       sigc::mem_fun(*this, &MainWindow::on_selection_changed));
   image_view->signal_zoom_changed.connect(
       sigc::mem_fun(*this, &MainWindow::on_zoom_changed));
-  image_list->signal_folder_opened.connect(
-      sigc::mem_fun(*this, &MainWindow::on_folder_opened));
   image_worker.signal_finished.connect(
       sigc::mem_fun(*this, &MainWindow::on_image_loaded));
   settings->signal_changed().connect(
@@ -58,10 +56,19 @@ MainWindow::MainWindow(BaseObjectType* cobject,
   show_all_children();
 }
 
-void MainWindow::open(const Glib::RefPtr<Gio::File>& folder) {
+void MainWindow::open(Glib::RefPtr<Gio::File> file) {
+  Glib::RefPtr<Gio::File> file_to_select;
+  if (file->query_file_type() == Gio::FILE_TYPE_REGULAR) {
+    // Open the folder the file is in, and select it.
+    file_to_select = file;
+    file = file->get_parent();
+  }
+
   list_view->get_selection()->unselect_all();
-  image_list->open_folder(folder);
-  folder_path = folder->get_path();
+  image_list->open_folder(sigc::bind(
+        sigc::mem_fun(*this, &MainWindow::on_folder_ready), file_to_select),
+      file);
+  folder_path = file->get_path();
   header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
 
@@ -140,18 +147,24 @@ void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
   header_bar->set_subtitle(Glib::filename_display_basename(task.path));
 }
 
-void MainWindow::on_folder_opened(bool success) {
-  if (success) {
-    if (image_list->children().size()) {
-      // Select the first image and scroll to the top if there is no selection.
-      if (!list_view->get_selection()->get_selected()) {
-        list_view->get_selection()->select(Gtk::TreePath("0"));
-        list_view->get_vadjustment()->set_value(0);
-      }
-    } else
-      show_message(_("No images in this folder"), "emblem-photos-symbolic");
-  } else
+void MainWindow::on_folder_ready(bool success,
+    const Glib::RefPtr<Gio::File>& file_to_select) {
+  if (!success)
     show_message(_("Could not open this folder"));
+  else if (!image_list->children().size())
+    show_message(_("No images in this folder"), "emblem-photos-symbolic");
+  else if (!list_view->get_selection()->get_selected()) {
+    // Since there is no selection yet, select and scroll to either the first
+    // image, or a requested one.
+    Gtk::TreePath path("0");
+    if (file_to_select) {
+      Gtk::TreeIter iter = image_list->find(file_to_select->get_path());
+      if (iter)
+        path = Gtk::TreePath(iter);
+    }
+    list_view->get_selection()->select(path);
+    list_view->scroll_to_row(path);
+  }
 }
 
 void MainWindow::on_setting_changed(const Glib::ustring& key) {

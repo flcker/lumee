@@ -42,7 +42,7 @@ Application::Application()
 
 // Returns true to exit without starting the application, false to continue.
 bool Application::local_command_line_vfunc(char**& argv, int& exit_status) {
-  Glib::OptionContext context("[FOLDER]");
+  Glib::OptionContext context("[FOLDER | FILE]");
   Glib::OptionGroup group("", "");
   Glib::OptionGroup group_gtk(gtk_get_option_group(true));
   context.set_main_group(group);

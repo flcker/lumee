@@ -25,6 +25,12 @@
 // A model that stores a list of image files with thumbnails.
 class ImageList : public Gtk::ListStore {
  public:
+  // Function that will be called when opening a folder has completed,
+  // successfully or not.
+  //
+  // void on_folder_ready(bool success)
+  typedef sigc::slot<void, bool> SlotFolderReady;
+
   struct Columns : public Gtk::TreeModelColumnRecord {
     Gtk::TreeModelColumn<std::string> path;
     Gtk::TreeModelColumn<Glib::ustring> display_name;
@@ -39,23 +45,27 @@ class ImageList : public Gtk::ListStore {
 
   ImageList();
 
-  // Opens a folder, replacing the current list with the folder's images.
-  void open_folder(const Glib::RefPtr<Gio::File>& folder);
+  // Opens a folder asynchronously, replacing the current list with the
+  // folder's images.
+  void open_folder(const SlotFolderReady& slot,
+      const Glib::RefPtr<Gio::File>& folder);
+
+  // Searches for an image with a given file path. If not found, returns an
+  // empty iterator.
+  iterator find(const std::string& path);
 
   static Glib::RefPtr<ImageList> create();
 
   const Columns columns;
 
-  // Slot prototype: void on_my_folder_opened(bool success)
-  //
-  // Emitted when a folder has finished being opened, successfully or not.
-  sigc::signal<void, bool> signal_folder_opened;
-
  private:
   // Data used while asynchronously opening a folder.
-  struct AsyncData {
-    AsyncData(const Glib::RefPtr<Gio::File>& folder) : folder(folder) {}
+  struct AsyncFolderData {
+    AsyncFolderData(const SlotFolderReady& slot,
+        const Glib::RefPtr<Gio::File>& folder)
+        : slot_folder_ready(slot), folder(folder) {}
 
+    SlotFolderReady slot_folder_ready;
     Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
     Glib::RefPtr<Gio::File> folder;
     Glib::RefPtr<Gio::FileEnumerator> enumerator;
@@ -67,9 +77,9 @@ class ImageList : public Gtk::ListStore {
 
   // Handlers for asynchronously opening a folder.
   void on_enumerate_children(const Glib::RefPtr<Gio::AsyncResult>& result,
-      AsyncData& data);
+      AsyncFolderData& data);
   void on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
-      const AsyncData& data);
+      const AsyncFolderData& data);
 
   // Appends an image file to the list.
   void append_image(const std::string& folder_path,

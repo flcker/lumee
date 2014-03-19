@@ -41,18 +41,26 @@ ImageList::ImageList() {
         &ImageList::on_thumbnail_loaded));
 }
 
-void ImageList::open_folder(const Glib::RefPtr<Gio::File>& folder) {
+void ImageList::open_folder(const SlotFolderReady& slot,
+    const Glib::RefPtr<Gio::File>& folder) {
   // Cancel everything from the previous folder.
   if (cancellable)
     cancellable->cancel();
   image_worker.cancel_all();
   clear();
 
-  AsyncData data = AsyncData(folder);
+  AsyncFolderData data(slot, folder);
   cancellable = data.cancellable;
   folder->enumerate_children_async(sigc::bind(
         sigc::mem_fun(*this, &ImageList::on_enumerate_children), data),
       cancellable, FILE_ATTRIBUTES);
+}
+
+ImageList::iterator ImageList::find(const std::string& path) {
+  for (iterator iter : children())
+    if (std::string((*iter)[columns.path]) == path)
+      return iter;
+  return iterator();
 }
 
 // static
@@ -64,12 +72,12 @@ Glib::RefPtr<ImageList> ImageList::create() {
 
 // Gets the enumerator and starts the file loop.
 void ImageList::on_enumerate_children(
-    const Glib::RefPtr<Gio::AsyncResult>& result, AsyncData& data) {
+    const Glib::RefPtr<Gio::AsyncResult>& result, AsyncFolderData& data) {
   try {
     data.enumerator = data.folder->enumerate_children_finish(result);
   } catch (const Gio::Error& error) {
     if (error.code() != Gio::Error::CANCELLED)
-      signal_folder_opened.emit(false);
+      data.slot_folder_ready(false);
     return;
   }
   data.enumerator->next_files_async(
@@ -79,13 +87,13 @@ void ImageList::on_enumerate_children(
 
 // Appends all the images in this chunk of files.
 void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
-    const AsyncData& data) {
+    const AsyncFolderData& data) {
   std::vector<Glib::RefPtr<Gio::FileInfo>> files;
   try {
     files = data.enumerator->next_files_finish(result);
   } catch (const Gio::Error& error) {
     if (error.code() != Gio::Error::CANCELLED)
-      signal_folder_opened.emit(false);
+      data.slot_folder_ready(false);
     return;
   }
 
@@ -98,7 +106,7 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
         sigc::bind(sigc::mem_fun(*this, &ImageList::on_next_files), data),
         data.cancellable, ASYNC_NUM_FILES, Glib::PRIORITY_HIGH_IDLE);
   else
-    signal_folder_opened.emit(true);
+    data.slot_folder_ready(true);
 }
 
 void ImageList::append_image(const std::string& folder_path,

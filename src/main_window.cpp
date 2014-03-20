@@ -112,7 +112,7 @@ void MainWindow::open_file_chooser() {
 // In addition to showing a thumbnail, thumbnail cells can be in a "failed" or
 // "loading" state.
 void MainWindow::on_thumbnail_cell_data(Gtk::CellRenderer* cell_base,
-                                        const Gtk::TreeIter& iter) {
+                                        const Gtk::TreeModel::iterator& iter) {
   auto cell = dynamic_cast<Gtk::CellRendererPixbuf*>(cell_base);
   Glib::RefPtr<Gdk::Pixbuf> thumbnail = (*iter)[image_list->columns.thumbnail];
   if ((*iter)[image_list->columns.thumbnail_failed])
@@ -125,7 +125,7 @@ void MainWindow::on_thumbnail_cell_data(Gtk::CellRenderer* cell_base,
 
 void MainWindow::on_selection_changed() {
   image_worker.cancel_all();  // Only one image should be loading at a time.
-  Gtk::TreeIter iter = list_view->get_selection()->get_selected();
+  Gtk::TreeModel::iterator iter = list_view->get_selection()->get_selected();
   if (iter)
     image_worker.load((*iter)[image_list->columns.path]);
   else {  // No selection.
@@ -158,11 +158,11 @@ void MainWindow::on_folder_ready(
   else if (!list_view->get_selection()->get_selected()) {
     // Since there is no selection yet, select and scroll to either the first
     // image, or a requested one.
-    Gtk::TreePath path("0");
+    Gtk::TreeModel::Path path("0");
     if (file_to_select) {
-      Gtk::TreeIter iter = image_list->find(file_to_select->get_path());
-      if (iter)
-        path = Gtk::TreePath(iter);
+      if (Gtk::TreeModel::iterator iter =
+              image_list->find(file_to_select->get_path()))
+        path = image_list->get_path(iter);
     }
     list_view->get_selection()->select(path);
     list_view->scroll_to_row(path);

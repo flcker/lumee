@@ -35,9 +35,9 @@ class WorkQueue {
   // Stops processing the queue and waits for the thread to exit.
   void stop();
 
-  // Slot that is invoked in the critical section after a work slot is popped
-  // from the queue, before the work slot is invoked.
-  sigc::slot<void> on_popped;
+  // Function to call in the critical section after a work slot is popped from
+  // the queue, before the work slot is called.
+  sigc::slot<void> slot_popped;
 
  private:
   // Runs a loop in a thread waiting for slots.
@@ -46,7 +46,7 @@ class WorkQueue {
   Glib::Threads::Thread* thread = nullptr;
   Glib::Threads::Mutex mutex;
   Glib::Threads::Cond cond;
-  std::deque<sigc::slot<void>> deque;
+  std::deque<sigc::slot<void>> slots;
   bool stopping = false;
 };
 

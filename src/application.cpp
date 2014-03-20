@@ -122,7 +122,7 @@ void Application::load_ui() {
   std::string data_dir = RuntimeInfo::get_data_dir();
   Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
   builder->add_from_file(Glib::build_filename(data_dir, "app_menu.ui"));
-  set_app_menu(Glib::RefPtr<Gio::Menu>::cast_static(builder->get_object(
+  set_app_menu(Glib::RefPtr<Gio::Menu>::cast_dynamic(builder->get_object(
       "app-menu")));
   builder->add_from_file(Glib::build_filename(data_dir, "main.ui"));
   builder->get_widget_derived("main-window", main_window);

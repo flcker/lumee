@@ -80,15 +80,18 @@ class ImageList : public Gtk::ListStore {
   void on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
                      const AsyncFolderData& data);
 
-  // Appends an image file to the list.
-  void append_image(const std::string& folder_path,
-                    const Glib::RefPtr<Gio::FileInfo>& info);
+  // Appends an image file to the list. 'folder_path' is the folder containing
+  // the image, and 'info' is the image file itself.
+  void append_file(const std::string& folder_path,
+                   const Glib::RefPtr<Gio::FileInfo>& info);
 
   bool is_supported_mime_type(const Glib::ustring& mime_type);
   void on_thumbnail_loaded(const ImageWorker::Task& task);
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;
+
+  // Cancellable from the most recent AsyncFolderData.
   Glib::RefPtr<Gio::Cancellable> cancellable;
 };
 

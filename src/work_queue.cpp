@@ -25,14 +25,14 @@ void WorkQueue::push(const sigc::slot<void>& slot) {
                                                          &WorkQueue::run));
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    deque.push_back(slot);
+    slots.push_back(slot);
   }
   cond.signal();
 }
 
 void WorkQueue::clear() {
   Glib::Threads::Mutex::Lock lock(mutex);
-  deque.clear();
+  slots.clear();
 }
 
 void WorkQueue::stop() {
@@ -53,14 +53,14 @@ void WorkQueue::run() {
     sigc::slot<void> slot;
     {
       Glib::Threads::Mutex::Lock lock(mutex);
-      while (!stopping && deque.empty())
+      while (!stopping && slots.empty())
         cond.wait(mutex);
       if (stopping)
         break;
 
-      slot = deque.front();
-      deque.pop_front();
-      on_popped();
+      slot = slots.front();
+      slots.pop_front();
+      slot_popped();
     }
     slot();
   }

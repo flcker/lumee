@@ -48,7 +48,7 @@ class MainWindow : public Gtk::ApplicationWindow {
 
   // Shows thumbnails in the list view.
   void on_thumbnail_cell_data(Gtk::CellRenderer* cell,
-                              const Gtk::TreeIter& iter);
+                              const Gtk::TreeModel::iterator& iter);
 
   // Loads an image based on the file list's selection.
   void on_selection_changed();

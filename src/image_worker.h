@@ -74,7 +74,7 @@ class ImageWorker {
   WorkQueue work_queue;
   Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();
   Glib::Threads::Mutex mutex;
-  std::queue<Task> result_queue;
+  std::queue<Task> results;
   Glib::Dispatcher dispatcher;
 };
 

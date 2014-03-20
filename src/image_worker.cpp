@@ -20,7 +20,7 @@
 
 ImageWorker::ImageWorker() {
   // Since a single cancellable is reused, it should be reset before each task.
-  work_queue.on_popped = [this]() { cancellable->reset(); };
+  work_queue.slot_popped = [this]() { cancellable->reset(); };
   dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
 }
 
@@ -57,7 +57,7 @@ void ImageWorker::process(const sigc::slot<void, Task&>& slot, Task& task) {
   }
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    result_queue.push(std::move(task));
+    results.push(std::move(task));
   }
   dispatcher.emit();
 }
@@ -88,8 +88,8 @@ void ImageWorker::emit_finished() {
   Task task;
   {
     Glib::Threads::Mutex::Lock lock(mutex);
-    task = result_queue.front();
-    result_queue.pop();
+    task = results.front();
+    results.pop();
   }
   signal_finished.emit(task);
 }

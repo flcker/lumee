@@ -33,8 +33,8 @@ ImageList::ImageList() {
   // Build a list of supported image MIME types.
   for (Gdk::PixbufFormat format : Gdk::Pixbuf::get_formats()) {
     std::vector<Glib::ustring> mime_types = format.get_mime_types();
-    supported_mime_types.insert(end(supported_mime_types), begin(mime_types),
-                                end(mime_types));
+    supported_mime_types.insert(end(supported_mime_types),
+                                begin(mime_types), end(mime_types));
   }
   image_worker.signal_finished.connect(sigc::mem_fun(
       *this, &ImageList::on_thumbnail_loaded));
@@ -55,10 +55,11 @@ void ImageList::open_folder(const SlotFolderReady& slot,
                  data), cancellable, FILE_ATTRIBUTES);
 }
 
-ImageList::iterator ImageList::find(const std::string& path) {
-  for (iterator iter : children())
+Gtk::TreeModel::iterator ImageList::find(const std::string& path) {
+  for (iterator iter : children()) {
     if (std::string((*iter)[columns.path]) == path)
       return iter;
+  }
   return iterator();
 }
 
@@ -97,7 +98,7 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
   }
   for (Glib::RefPtr<Gio::FileInfo> info : files)
     if (!info->is_hidden() && is_supported_mime_type(info->get_content_type()))
-      append_image(data.folder->get_path(), info);
+      append_file(data.folder->get_path(), info);
 
   if (files.size())  // Recurse until there are no more files.
     data.enumerator->next_files_async(
@@ -107,10 +108,10 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
     data.slot_folder_ready(true);
 }
 
-void ImageList::append_image(const std::string& folder_path,
-                             const Glib::RefPtr<Gio::FileInfo>& info) {
-  Gtk::TreeIter iter = append();
-  Gtk::TreeRow row = *iter;
+void ImageList::append_file(const std::string& folder_path,
+                            const Glib::RefPtr<Gio::FileInfo>& info) {
+  iterator iter = append();
+  Row row = *iter;
   row[columns.path] = Glib::build_filename(folder_path, info->get_name());
   row[columns.display_name] = info->get_display_name();
   row[columns.time_modified] = info->get_attribute_uint64(
@@ -130,7 +131,7 @@ bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
 
 void ImageList::on_thumbnail_loaded(const ImageWorker::Task& task) {
   if (task.iter) {
-    Gtk::TreeRow row = *task.iter;
+    Row row = *task.iter;
     if (task.pixbuf)
       row[columns.thumbnail] = task.pixbuf;
     else

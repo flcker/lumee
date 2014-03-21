@@ -34,21 +34,33 @@ class ImageView : public Gtk::ScrolledWindow {
   ImageView(BaseObjectType* cobject,
             const Glib::RefPtr<Gtk::Builder>& builder);
 
+  // Sets or clears the image.
   void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
   void clear();
+
+  // Returns true if no image is displayed.
   bool empty() const { return !bool(pixbuf); }
 
+  // Returns the current zoom factor.
   double get_zoom() const { return zoom_factor; }
+
+  // Returns true if the zoom factor is currently at the maximum or minimum,
+  // respectively.
   bool zoom_is_max() const { return zoom_factor >= ZOOM_MAX; }
   bool zoom_is_min() const { return zoom_factor <= ZOOM_MIN; }
+
+  // Returns the current zoom-to-fit mode.
   ZoomFit get_zoom_fit() const { return zoom_fit; }
 
-  // Zooms in or out. When 'step' is true, the zoom factor snaps to the next
+  // Zooms in or out. When `step` is true, the zoom factor snaps to the next
   // preset value. Otherwise, a multiplier is used.
   void zoom_in(bool step);
   void zoom_out(bool step);
 
+  // Zooms to the specified factor.
   void zoom_to(double factor);
+
+  // Changes the current zoom-to-fit mode.
   void zoom_to_fit(ZoomFit fit);
 
   // Expands images to fit. If true, images smaller than the allocated area
@@ -59,6 +71,8 @@ class ImageView : public Gtk::ScrolledWindow {
   sigc::signal<void> signal_zoom_changed;
 
  protected:
+  // Keeps the image zoomed to fit (if applicable) when the allocated area
+  // changes.
   virtual void on_size_allocate(Gtk::Allocation& allocation);
 
  private:
@@ -73,8 +87,8 @@ class ImageView : public Gtk::ScrolledWindow {
   static const double ZOOM_MAX;
 
   // Updates the image based on current zoom settings.
-  void update(const Gtk::Allocation& allocation);
   void update() { update(get_allocation()); }
+  void update(const Gtk::Allocation& allocation);
 
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
   Gtk::Image image;

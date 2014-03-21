@@ -27,6 +27,7 @@
 #include <gtkmm/stack.h>
 #include <gtkmm/treeview.h>
 
+// Main window of the application.
 class MainWindow : public Gtk::ApplicationWindow {
  public:
   MainWindow(BaseObjectType* cobject,
@@ -56,11 +57,12 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Shows an image that has finished loading.
   void on_image_loaded(const ImageWorker::Task& task);
 
-  // Handler for when opening a folder has completed. Selects 'file_to_select'
+  // Handler for when a folder has finished opening. Selects `file_to_select`
   // in the list, if valid.
   void on_folder_ready(bool success,
                        const Glib::RefPtr<Gio::File>& file_to_select);
 
+  // Updates parts of the window when settings change.
   void on_setting_changed(const Glib::ustring& key);
 
   // Handlers for zoom actions.
@@ -70,6 +72,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   void zoom_to_fit(const Glib::ustring& fit);
   void on_zoom_changed();
 
+  // Sorts the image list.
   void sort(const Glib::ustring& mode, bool reversed);
 
   // Shows a message in the center of the window.

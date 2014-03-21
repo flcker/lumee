@@ -42,7 +42,7 @@ void RuntimeInfo::init() {
   }
 }
 
-// When 'scrollbar_width' is nonzero, only width is constrained. Otherwise,
+// When `scrollbar_width` is nonzero, only width is constrained. Otherwise,
 // both width and height are constrained.
 double scale_to_fit(int dest_width, int dest_height, int src_width,
                     int src_height, bool expand, int scrollbar_width) {

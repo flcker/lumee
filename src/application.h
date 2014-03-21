@@ -22,15 +22,18 @@
 #include <gtkmm/aboutdialog.h>
 #include <gtkmm/application.h>
 
+// Main application class.
 class Application : public Gtk::Application {
  public:
   virtual ~Application();
 
+  // Creates a new instance.
   static Glib::RefPtr<Application> create();
 
  protected:
   Application();
 
+  // Signal handlers.
   virtual bool local_command_line_vfunc(char**& argv, int& exit_status);
   virtual void on_startup();
   virtual int on_command_line(
@@ -38,10 +41,13 @@ class Application : public Gtk::Application {
   virtual void on_open(const type_vec_files& files, const Glib::ustring& hint);
 
  private:
-  // Loads the CSS and UI at startup.
+  // Loads the UI and CSS at startup.
   void load_ui();
 
+  // Shows a dialog with information about the application.
   void show_about_dialog();
+
+  // Hides all windows, causing the application to quit.
   void hide_all_windows();
 
   MainWindow* main_window = nullptr;

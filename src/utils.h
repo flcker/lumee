@@ -21,7 +21,7 @@
 // Information about the application's runtime environment.
 class RuntimeInfo {
  public:
-  // Initializes the class; call this first.
+  // Must be called first.
   static void init();
 
   static bool is_installed() { return installed; }
@@ -33,9 +33,9 @@ class RuntimeInfo {
 };
 
 // Returns the scale factor needed to fit the source area into the destination
-// area. The factor won't exceed 1.0 unless 'expand' is true.
+// area. The factor won't exceed 1.0 unless `expand` is true.
 //
-// If 'scrollbar_width' is specified, the scaled height will be allowed to
+// If `scrollbar_width` is specified, the scaled height will be allowed to
 // exceed the destination height, with the scrollbar's width being subtracted
 // from the destination width in this case.
 double scale_to_fit(int dest_width, int dest_height, int src_width,

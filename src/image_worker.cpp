@@ -21,7 +21,7 @@
 ImageWorker::ImageWorker() {
   // Since a single cancellable is reused, it should be reset before each task.
   work_queue.slot_popped = [this]() { cancellable->reset(); };
-  dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::emit_finished));
+  dispatcher.connect(sigc::mem_fun(*this, &ImageWorker::finish_task));
 }
 
 ImageWorker::~ImageWorker() {
@@ -32,13 +32,13 @@ ImageWorker::~ImageWorker() {
 void ImageWorker::load(const std::string& path, int scale_size,
                        const Gtk::TreeIter& iter) {
   work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
-                             sigc::mem_fun(*this, &ImageWorker::do_load),
+                             sigc::mem_fun(*this, &ImageWorker::load_task),
                              Task(path, scale_size, iter)));
 }
 
-// Because the cancellable is reset before each task, clear() needs to run
-// first. Otherwise, a task could be popped after cancel() and before clear().
-// This function would need to lock work_queue's mutex to avoid that.
+// Since the cancellable is reset after a task is popped, `clear()` needs to
+// run first. Otherwise, a task could start between `cancel()` and `clear()`.
+// This function would need to lock `work_queue`'s mutex to avoid that.
 void ImageWorker::cancel_all() {
   work_queue.clear();
   cancellable->cancel();
@@ -63,8 +63,8 @@ void ImageWorker::process(const sigc::slot<void, Task&>& slot, Task& task) {
 }
 
 // Runs in a worker thread.
-void ImageWorker::do_load(Task& task) {
-  // TODO: Compare Pixbuf::create_from_file's speed with PixbufLoader.
+void ImageWorker::load_task(Task& task) {
+  // TODO: Compare `Pixbuf::create_from_file()`'s speed with `PixbufLoader`.
   // TODO: Check if network-mounted or very large images can stall the thread.
   // TODO: Support animated images.
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(task.path);
@@ -84,7 +84,7 @@ void ImageWorker::do_load(Task& task) {
 }
 
 // Runs in the main thread.
-void ImageWorker::emit_finished() {
+void ImageWorker::finish_task() {
   Task task;
   {
     Glib::Threads::Mutex::Lock lock(mutex);

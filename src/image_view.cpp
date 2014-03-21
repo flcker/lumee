@@ -92,7 +92,7 @@ void ImageView::update(const Gtk::Allocation& allocation) {
                                pixbuf->get_width(), pixbuf->get_height(),
                                zoom_fit_expand);
   else if (zoom_fit == ZOOM_FIT_WIDTH) {
-    int scrollbar_width = 0, _;  // '_' is an unused placeholder.
+    int scrollbar_width = 0, _;  // `_` is an unused placeholder.
     get_vscrollbar()->get_preferred_width(scrollbar_width, _);
     zoom_factor = scale_to_fit(allocation.get_width(), allocation.get_height(),
                                pixbuf->get_width(), pixbuf->get_height(),

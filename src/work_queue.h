@@ -25,7 +25,7 @@ class WorkQueue {
  public:
   ~WorkQueue();
 
-  // Adds a slot to the end of the queue. If this is the first time push() is
+  // Adds a slot to the end of the queue. If this is the first time `push()` is
   // called for this instance, starts a thread first.
   void push(const sigc::slot<void>& slot);
 

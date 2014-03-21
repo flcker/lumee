@@ -25,10 +25,11 @@
 
 #include <queue>
 
-// Loads images in a thread and returns the results asynchronously.
+// Loads images in a thread and returns the results asynchronously. The result
+// of each task started by `load()` will be emitted in `signal_finished`.
 class ImageWorker {
  public:
-  // A task that can be processed.
+  // Task that can be processed.
   struct Task {
     Task(const std::string& path, int scale_size, const Gtk::TreeIter& iter)
         : path(path), scale_size(scale_size), iter(iter) {}
@@ -40,36 +41,35 @@ class ImageWorker {
     // Size to scale the image to, if any (assumes an equal width and height).
     int scale_size = 0;
 
-    // Unused by ImageWorker, but useful for the thumbnail callback. Maybe
-    // there's a cleaner way to store this.
+    // TODO: This doesn't belong here, but `ImageList` needs it.
     Gtk::TreeIter iter;
 
-    // Result of the task after being processed. If it failed, 'pixbuf' will be
-    // an empty pointer.
+    // Result of the finished task. If it failed, the pointer will be empty.
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
   };
 
   ImageWorker();
   ~ImageWorker();
 
-  // Adds a loading task to the queue.
+  // Loads an image file asynchronously (see `Task`).
   void load(const std::string& path, int scale_size = 0,
             const Gtk::TreeIter& iter = Gtk::TreeIter());
 
   // Cancels the running task and removes all queued tasks.
   void cancel_all();
 
-  // Notifies when an image is done.
+  // Emitted when an image has finished loading or failed to load.
   sigc::signal<void, Task> signal_finished;
 
  private:
-  // Processes a slot and task, communicating the result to the main thread.
+  // Processes a slot and task, passing the result to the main thread.
   void process(const sigc::slot<void, Task&>& slot, Task& task);
 
-  // Loads an image.
-  void do_load(Task& task);
+  // Does the actual loading of an image file.
+  void load_task(Task& task);
 
-  void emit_finished();
+  // Pops a task from the result queue and emits the signal.
+  void finish_task();
 
   WorkQueue work_queue;
   Glib::RefPtr<Gio::Cancellable> cancellable = Gio::Cancellable::create();

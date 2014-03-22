@@ -78,17 +78,19 @@ bool MainWindow::on_window_state_event(GdkEventWindowState* event) {
 void MainWindow::add_actions() {
   add_action("open", sigc::mem_fun(*this, &MainWindow::open_file_chooser));
   action_zoom_in = add_action(
-      "zoom-in", sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), true));
+      "zoom-in",
+      sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_in), true));
   action_zoom_in_no_step = add_action(
       "zoom-in-no-step",
-      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_in), false));
+      sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_in), false));
   action_zoom_out = add_action(
       "zoom-out",
-      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_out), true));
+      sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_out), true));
   action_zoom_out_no_step = add_action(
       "zoom-out-no-step",
-      sigc::bind(sigc::mem_fun(*this, &MainWindow::zoom_out), false));
-  add_action("zoom-normal", sigc::mem_fun(*this, &MainWindow::zoom_normal));
+      sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_out), false));
+  add_action("zoom-normal",
+             sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_to), 1.0));
   action_zoom_to_fit = add_action_radio_string(
       "zoom-to-fit", sigc::mem_fun(*this, &MainWindow::zoom_to_fit),
       "fit-best");
@@ -177,10 +179,6 @@ void MainWindow::on_setting_changed(const Glib::ustring& key) {
   else if (key == "zoom-to-fit-expand")
     image_view->zoom_to_fit_expand(settings->get_boolean(key));
 }
-
-void MainWindow::zoom_in(bool step) { image_view->zoom_in(step); }
-void MainWindow::zoom_out(bool step) { image_view->zoom_out(step); }
-void MainWindow::zoom_normal() { image_view->zoom_to(1.0); }
 
 void MainWindow::zoom_to_fit(const Glib::ustring& fit) {
   action_zoom_to_fit->change_state(fit);

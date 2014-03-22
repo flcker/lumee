@@ -66,10 +66,7 @@ class MainWindow : public Gtk::ApplicationWindow {
   // Updates parts of the window when settings change.
   void on_setting_changed(const Glib::ustring& key);
 
-  // Handlers for zoom actions.
-  void zoom_in(bool step);
-  void zoom_out(bool step);
-  void zoom_normal();
+  // Zoom handlers.
   void zoom_to_fit(const Glib::ustring& fit);
   void on_zoom_changed();
 

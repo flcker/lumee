@@ -41,8 +41,6 @@ MainWindow::MainWindow(BaseObjectType* cobject,
       *this, &MainWindow::on_selection_changed));
   image_view->signal_zoom_changed.connect(sigc::mem_fun(
       *this, &MainWindow::on_zoom_changed));
-  image_worker.signal_finished.connect(sigc::mem_fun(
-      *this, &MainWindow::on_image_loaded));
   settings->signal_changed().connect(sigc::mem_fun(
       *this, &MainWindow::on_setting_changed));
 
@@ -126,18 +124,21 @@ void MainWindow::on_thumbnail_cell_data(Gtk::CellRenderer* cell_base,
 void MainWindow::on_selection_changed() {
   image_worker.cancel_all();  // Only one image should be loading at a time.
   Gtk::TreeModel::iterator iter = list_view->get_selection()->get_selected();
-  if (iter)
-    image_worker.load((*iter)[image_list->columns.path]);
-  else {  // No selection.
+  if (iter) {
+    std::string path = (*iter)[image_list->columns.path];
+    image_worker.load(std::bind(&MainWindow::on_image_loaded, this,
+                                std::placeholders::_1, path), path);
+  } else {  // No selection.
     image_view->clear();
     stack->set_visible_child(*image_view);
     header_bar->set_subtitle("");
   }
 }
 
-void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
-  if (task.pixbuf) {
-    image_view->set(task.pixbuf);
+void MainWindow::on_image_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
+                                 const std::string& path) {
+  if (pixbuf) {
+    image_view->set(pixbuf);
     // Reset scroll position.
     image_view->get_hadjustment()->set_value(0);
     image_view->get_vadjustment()->set_value(0);
@@ -146,7 +147,7 @@ void MainWindow::on_image_loaded(const ImageWorker::Task& task) {
     show_message(_("Could not load this image"));
     image_view->clear();
   }
-  header_bar->set_subtitle(Glib::filename_display_basename(task.path));
+  header_bar->set_subtitle(Glib::filename_display_basename(path));
 }
 
 void MainWindow::on_folder_ready(

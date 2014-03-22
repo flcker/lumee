@@ -90,7 +90,8 @@ class ImageList : public Gtk::ListStore {
   bool is_supported_mime_type(const Glib::ustring& mime_type);
 
   // Updates a row with its thumbnail.
-  void on_thumbnail_loaded(const ImageWorker::Task& task);
+  void on_thumbnail_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
+                           const iterator& iter);
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;

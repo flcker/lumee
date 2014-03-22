@@ -29,11 +29,11 @@ ImageWorker::~ImageWorker() {
   work_queue.stop();
 }
 
-void ImageWorker::load(const std::string& path, int scale_size,
-                       const Gtk::TreeIter& iter) {
+void ImageWorker::load(const SlotFinished& slot, const std::string& path,
+                       int scale_size) {
   work_queue.push(sigc::bind(sigc::mem_fun(*this, &ImageWorker::process),
                              sigc::mem_fun(*this, &ImageWorker::load_task),
-                             Task(path, scale_size, iter)));
+                             Task(slot, path, scale_size)));
 }
 
 // Since the cancellable is reset after a task is popped, `clear()` needs to
@@ -53,7 +53,7 @@ void ImageWorker::process(const sigc::slot<void, Task&>& slot, Task& task) {
       return;
     else throw;
   } catch (const Glib::Error&) {
-    task.pixbuf.reset();
+    task.result.reset();
   }
   {
     Glib::Threads::Mutex::Lock lock(mutex);
@@ -80,7 +80,7 @@ void ImageWorker::load_task(Task& task) {
     if (cancellable->is_cancelled())
       throw Gio::Error(Gio::Error::CANCELLED, "");
   }
-  task.pixbuf = pixbuf;
+  task.result = pixbuf;
 }
 
 // Runs in the main thread.
@@ -91,5 +91,5 @@ void ImageWorker::finish_task() {
     task = results.front();
     results.pop();
   }
-  signal_finished.emit(task);
+  task.slot_finished(task.result);
 }

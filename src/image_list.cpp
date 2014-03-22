@@ -36,8 +36,6 @@ ImageList::ImageList() {
     supported_mime_types.insert(end(supported_mime_types),
                                 begin(mime_types), end(mime_types));
   }
-  image_worker.signal_finished.connect(sigc::mem_fun(
-      *this, &ImageList::on_thumbnail_loaded));
 }
 
 void ImageList::open_folder(const SlotFolderReady& slot,
@@ -121,7 +119,10 @@ void ImageList::append_file(const std::string& folder_path,
       Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
       Glib::Markup::escape_text(Glib::DateTime::create_now_local(
           row[columns.time_modified]).format("%c"));
-  image_worker.load(row[columns.path], THUMBNAIL_SIZE, iter);
+
+  image_worker.load(std::bind(&ImageList::on_thumbnail_loaded, this,
+                              std::placeholders::_1, iter),
+                    row[columns.path], THUMBNAIL_SIZE);
 }
 
 bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
@@ -129,12 +130,12 @@ bool ImageList::is_supported_mime_type(const Glib::ustring& mime_type) {
                    mime_type) != end(supported_mime_types);
 }
 
-void ImageList::on_thumbnail_loaded(const ImageWorker::Task& task) {
-  if (task.iter) {
-    Row row = *task.iter;
-    if (task.pixbuf)
-      row[columns.thumbnail] = task.pixbuf;
-    else
-      row[columns.thumbnail_failed] = true;
-  }
+void ImageList::on_thumbnail_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
+                                    const iterator& iter) {
+  if (!iter)  // The file may have been removed from the list by this point.
+    return;
+  else if (pixbuf)
+    (*iter)[columns.thumbnail] = pixbuf;
+  else
+    (*iter)[columns.thumbnail_failed] = true;
 }

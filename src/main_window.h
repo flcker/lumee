@@ -55,7 +55,8 @@ class MainWindow : public Gtk::ApplicationWindow {
   void on_selection_changed();
 
   // Shows an image that has finished loading.
-  void on_image_loaded(const ImageWorker::Task& task);
+  void on_image_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
+                       const std::string& path);
 
   // Handler for when a folder has finished opening. Selects `file_to_select`
   // in the list, if valid.

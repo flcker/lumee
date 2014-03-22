@@ -19,7 +19,7 @@
 #include <gtkmm/scrollbar.h>
 
 const std::vector<double> ImageView::ZOOM_STEPS{
-    0.15, 1/3.0, 0.5, 2/3.0, 1.0, 1.5, 2.0, 2.5, 3.0};
+    0.10, 0.20, 1/3., 0.5, 2/3., 1.0, 1.5, 2.0, 2.5, 3.0};
 const double ImageView::ZOOM_MULTIPLIER = 1.1;
 const double ImageView::ZOOM_MIN = ZOOM_STEPS.front();
 const double ImageView::ZOOM_MAX = ZOOM_STEPS.back();

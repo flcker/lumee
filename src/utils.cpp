@@ -26,7 +26,7 @@ bool RuntimeInfo::installed = true;
 std::string RuntimeInfo::data_dir = PKGDATADIR;
 
 // Checks the location of the current executable, in order to support being run
-// from the build directory. Doing this isn't portable and may need changes for
+// from the source tree. Doing this isn't portable and may need changes for
 // other operating systems.
 //
 // static

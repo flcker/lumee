@@ -16,9 +16,9 @@ lumee_LDADD = $(gtkmm_LIBS)
 
 @GSETTINGS_RULES@
 
-# This is needed for running from the build directory.
+# This is needed for running from the source tree.
 data/gschemas.compiled: $(gsettings_SCHEMAS:.xml=.valid)
-	$(AM_V_GEN) $(GLIB_COMPILE_SCHEMAS) data
+	$(AM_V_GEN) $(GLIB_COMPILE_SCHEMAS) --targetdir=data $(srcdir)/data
 all-local: data/gschemas.compiled
 
 EXTRA_DIST = README.md $(gsettings_SCHEMAS)

@@ -13,5 +13,6 @@ AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11(noext)
 AX_APPEND_COMPILE_FLAGS([-Wall -Wextra -Wpedantic -Werror])
 
-AC_CONFIG_FILES(Makefile)
+# GSettings generates files in `data`, so ensure it exists in VPATH builds.
+AC_CONFIG_FILES(Makefile, [$MKDIR_P data])
 AC_OUTPUT

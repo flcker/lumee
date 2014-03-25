@@ -1,5 +1,6 @@
 *.gschema.valid
 *.o
+*.tar.xz
 .deps
 .dirstamp
 gschemas.compiled

@@ -32,6 +32,15 @@ class RuntimeInfo {
   static std::string data_dir;
 };
 
+// Point represented by two coordinates.
+struct Point {
+  Point(double x, double y) : x(x), y(y) {}
+  Point() {}
+
+  double x = 0.0;
+  double y = 0.0;
+};
+
 // Returns the scale factor needed to fit the source area into the destination
 // area. The factor won't exceed 1.0 unless `expand` is true.
 //

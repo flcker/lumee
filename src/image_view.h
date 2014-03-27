@@ -16,6 +16,8 @@
 #ifndef LUMEE_IMAGE_VIEW_H
 #define LUMEE_IMAGE_VIEW_H
 
+#include "utils.h"
+
 #include <gtkmm/builder.h>
 #include <gtkmm/image.h>
 #include <gtkmm/scrolledwindow.h>
@@ -90,13 +92,32 @@ class ImageView : public Gtk::ScrolledWindow {
   void update() { update(get_allocation()); }
   void update(const Gtk::Allocation& allocation);
 
+  // Returns the point (in image coordinates) at the center of the viewport.
+  Point get_center() const;
+
+  // Scrolls the anchor point to the center when scrollbar bounds are changed
+  // to match the new zoomed image size.
+  void on_adjustment_changed(Gtk::Orientation orientation);
+
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
   Gtk::Image image;
+  Glib::RefPtr<Gtk::Adjustment> hadjustment = get_hadjustment(),
+                                vadjustment = get_vadjustment();
 
   double zoom_factor = 1.0;
-  double prev_zoom_factor = 0.0;  // Helps avoid re-scaling at the same factor.
   ZoomFit zoom_fit = ZOOM_FIT_BEST;
   bool zoom_fit_expand = false;
+
+  // Point (in image coordinates) to keep centered when zooming.
+  Point anchor;
+
+  // Previous zoom factor before the image is updated. Used to avoid re-scaling
+  // the image at the same zoom factor.
+  double prev_zoom_factor = 0.0;
+
+  // Zoom factor at the last change to each scrollbar's bounds. Used for
+  // calculating the visible center of the image.
+  double hadjustment_zoom_factor = 0.0, vadjustment_zoom_factor = 0.0;
 };
 
 #endif

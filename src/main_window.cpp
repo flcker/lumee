@@ -141,9 +141,6 @@ void MainWindow::on_image_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
                                  const std::string& path) {
   if (pixbuf) {
     image_view->set(pixbuf);
-    // Reset scroll position.
-    image_view->get_hadjustment()->set_value(0);
-    image_view->get_vadjustment()->set_value(0);
     stack->set_visible_child(*image_view);
   } else {
     show_message(_("Could not load this image"));

@@ -16,10 +16,11 @@
 #include "image_view.h"
 #include "utils.h"
 
+#include <gtkmm/adjustment.h>
 #include <gtkmm/scrollbar.h>
 
-const std::vector<double> ImageView::ZOOM_STEPS{
-    0.10, 0.20, 1/3., 0.5, 2/3., 1.0, 1.5, 2.0, 2.5, 3.0};
+const std::vector<double> ImageView::ZOOM_STEPS =
+    {0.10, 0.20, 1/3., 0.5, 2/3., 1.0, 1.5, 2.0, 2.5, 3.0};
 const double ImageView::ZOOM_MULTIPLIER = 1.1;
 const double ImageView::ZOOM_MIN = ZOOM_STEPS.front();
 const double ImageView::ZOOM_MAX = ZOOM_STEPS.back();
@@ -28,12 +29,17 @@ ImageView::ImageView(BaseObjectType* cobject,
                      const Glib::RefPtr<Gtk::Builder>& /*builder*/)
     : Gtk::ScrolledWindow(cobject) {
   add(image);
+  hadjustment->signal_changed().connect(sigc::bind(sigc::mem_fun(
+      *this, &ImageView::on_adjustment_changed), Gtk::ORIENTATION_HORIZONTAL));
+  vadjustment->signal_changed().connect(sigc::bind(sigc::mem_fun(
+      *this, &ImageView::on_adjustment_changed), Gtk::ORIENTATION_VERTICAL));
 }
 
 void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
   this->pixbuf = pixbuf;
-  prev_zoom_factor = 0.0;
+  prev_zoom_factor = hadjustment_zoom_factor = vadjustment_zoom_factor = 0.0;
   update();
+  anchor = Point(pixbuf->get_width() * 0.5, 0.0);  // Scroll to the top center.
   signal_zoom_changed.emit();
 }
 
@@ -101,9 +107,42 @@ void ImageView::update(const Gtk::Allocation& allocation) {
   zoom_factor = std::max(ZOOM_MIN, std::min(ZOOM_MAX, zoom_factor));
 
   if (zoom_factor != prev_zoom_factor) {
+    anchor = get_center();
     image.set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
         std::round(pixbuf->get_width() * zoom_factor),
         std::round(pixbuf->get_height() * zoom_factor), Gdk::INTERP_BILINEAR));
     prev_zoom_factor = zoom_factor;
+  }
+}
+
+// Defaults to the absolute center of the pixbuf. If the scaled image's width
+// or height is larger than the allocated area, calculates the visible center
+// based on scroll position and zoom factor.
+Point ImageView::get_center() const {
+  Point point(pixbuf->get_width() * 0.5, pixbuf->get_height() * 0.5);
+  if (hadjustment->get_upper() > hadjustment->get_page_size())
+    point.x = (hadjustment->get_value() + hadjustment->get_page_size() * 0.5) /
+              hadjustment_zoom_factor;
+  if (vadjustment->get_upper() > vadjustment->get_page_size())
+    point.y = (vadjustment->get_value() + vadjustment->get_page_size() * 0.5) /
+              vadjustment_zoom_factor;
+  return point;
+}
+
+// Centers the anchor point in response to `update()` zooming the image. The
+// horizontal and vertical adjustments are changed at practically the same
+// time, but they emit separate signals, so this function handles each one
+// separately.
+void ImageView::on_adjustment_changed(Gtk::Orientation orientation) {
+  if (orientation == Gtk::ORIENTATION_HORIZONTAL &&
+      zoom_factor != hadjustment_zoom_factor) {
+    hadjustment->set_value(anchor.x * zoom_factor -
+                           hadjustment->get_page_size() * 0.5);
+    hadjustment_zoom_factor = zoom_factor;
+  } else if (orientation == Gtk::ORIENTATION_VERTICAL &&
+             zoom_factor != vadjustment_zoom_factor) {
+    vadjustment->set_value(anchor.y * zoom_factor -
+                           vadjustment->get_page_size() * 0.5);
+    vadjustment_zoom_factor = zoom_factor;
   }
 }

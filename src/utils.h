@@ -16,6 +16,9 @@
 #ifndef LUMEE_UTILS_H
 #define LUMEE_UTILS_H
 
+#include <gdkmm/rectangle.h>
+#include <gdkmm/pixbuf.h>
+
 #include <string>
 
 // Information about the application's runtime environment.
@@ -32,6 +35,32 @@ class RuntimeInfo {
   static std::string data_dir;
 };
 
+// Represents two dimensions. It can be used to fit one area into another; see
+// the `fit()` member function. Example:
+//
+//     double factor = Dimensions(pixbuf).fit(allocation);
+class Dimensions {
+ public:
+  Dimensions(int width, int height) : width(width), height(height) {}
+  Dimensions(int square) : Dimensions(square, square) {}
+  Dimensions(const Gdk::Rectangle& rectangle)
+      : Dimensions(rectangle.get_width(), rectangle.get_height()) {}
+  Dimensions(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
+      : Dimensions(pixbuf->get_width(), pixbuf->get_height()) {}
+
+  // Returns the scale factor needed to fit these dimensions into the target
+  // dimensions. The factor won't exceed 1.0 unless `expand` is true.
+  //
+  // If `scrollbar_width` is specified, the scaled height will be allowed to
+  // exceed the target height, with the scrollbar's width being subtracted from
+  // the target width in this case.
+  double fit(Dimensions target, bool expand = false, int scrollbar_width = 0)
+      const;
+
+  int width = 0;
+  int height = 0;
+};
+
 // Point represented by two coordinates.
 struct Point {
   Point(double x, double y) : x(x), y(y) {}
@@ -40,16 +69,6 @@ struct Point {
   double x = 0.0;
   double y = 0.0;
 };
-
-// Returns the scale factor needed to fit the source area into the destination
-// area. The factor won't exceed 1.0 unless `expand` is true.
-//
-// If `scrollbar_width` is specified, the scaled height will be allowed to
-// exceed the destination height, with the scrollbar's width being subtracted
-// from the destination width in this case.
-double scale_to_fit(int dest_width, int dest_height, int src_width,
-                    int src_height, bool expand = false,
-                    int scrollbar_width = 0);
 
 // Converts a decimal to its percentage (for example, 0.12 becomes "12%").
 std::string to_percentage(double decimal);

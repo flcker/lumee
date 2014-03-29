@@ -94,23 +94,21 @@ void ImageView::update(const Gtk::Allocation& allocation) {
   if (empty())
     return;
   else if (zoom_fit == ZOOM_FIT_BEST)
-    zoom_factor = scale_to_fit(allocation.get_width(), allocation.get_height(),
-                               pixbuf->get_width(), pixbuf->get_height(),
-                               zoom_fit_expand);
+    zoom_factor = Dimensions(pixbuf).fit(allocation, zoom_fit_expand);
   else if (zoom_fit == ZOOM_FIT_WIDTH) {
     int scrollbar_width = 0, _;  // `_` is an unused placeholder.
     get_vscrollbar()->get_preferred_width(scrollbar_width, _);
-    zoom_factor = scale_to_fit(allocation.get_width(), allocation.get_height(),
-                               pixbuf->get_width(), pixbuf->get_height(),
-                               zoom_fit_expand, scrollbar_width);
+    zoom_factor = Dimensions(pixbuf).fit(allocation, zoom_fit_expand,
+                                         scrollbar_width);
   }
   zoom_factor = std::max(ZOOM_MIN, std::min(ZOOM_MAX, zoom_factor));
 
   if (zoom_factor != prev_zoom_factor) {
     anchor = get_center();
     image.set(zoom_factor == 1.0 ? pixbuf : pixbuf->scale_simple(
-        std::round(pixbuf->get_width() * zoom_factor),
-        std::round(pixbuf->get_height() * zoom_factor), Gdk::INTERP_BILINEAR));
+                  std::round(pixbuf->get_width() * zoom_factor),
+                  std::round(pixbuf->get_height() * zoom_factor),
+                  Gdk::INTERP_BILINEAR));
     prev_zoom_factor = zoom_factor;
   }
 }

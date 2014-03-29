@@ -44,28 +44,28 @@ void RuntimeInfo::init() {
 
 // When `scrollbar_width` is nonzero, only width is constrained. Otherwise,
 // both width and height are constrained.
-double scale_to_fit(int dest_width, int dest_height, int src_width,
-                    int src_height, bool expand, int scrollbar_width) {
-  if (!expand && src_width <= dest_width &&
-      (src_height <= dest_height ||
-       (scrollbar_width && src_width <= dest_width - scrollbar_width)))
+double Dimensions::fit(Dimensions target, bool expand, int scrollbar_width)
+    const {
+  if (!expand && width <= target.width &&
+      (height <= target.height ||
+       (scrollbar_width && width <= target.width - scrollbar_width)))
     return 1.0;
 
-  double w = dest_width;
-  double h = w * src_height / src_width;
-  if (std::round(h) > dest_height) {
+  double w = target.width;
+  double h = w * height / width;
+  if (std::round(h) > target.height) {
     if (scrollbar_width) {
-      w = dest_width - scrollbar_width;
-      h = w * src_height / src_width;
+      w = target.width - scrollbar_width;
+      h = w * height / width;
     }
     // Sometimes the image is no longer tall enough to cause a vertical
     // scrollbar after subtracting the scrollbar width above.
-    if (!scrollbar_width || std::round(h) <= dest_height) {
-      h = dest_height;
-      w = src_width * h / src_height;
+    if (!scrollbar_width || std::round(h) <= target.height) {
+      h = target.height;
+      w = width * h / height;
     }
   }
-  return (w / src_width + h / src_height) / 2;
+  return (w / width + h / height) / 2;
 }
 
 std::string to_percentage(double decimal) {

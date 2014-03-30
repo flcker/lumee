@@ -65,15 +65,15 @@ class ImageView : public Gtk::ScrolledWindow {
   // Changes the current zoom-to-fit mode.
   void zoom_to_fit(ZoomFit fit);
 
-  // Expands images to fit. If true, images smaller than the allocated area
-  // will be zoomed in when zoom-to-fit is enabled.
+  // Expands images to fit. If true, images smaller than the view will be
+  // zoomed in when zoom-to-fit is enabled.
   void zoom_to_fit_expand(bool expand);
 
   // Emitted when the zoom state changes, or an image is set or cleared.
   sigc::signal<void> signal_zoom_changed;
 
  protected:
-  // Keeps the image zoomed to fit (if applicable) when the allocated area
+  // Keeps the image zoomed to fit (if applicable) when the size allocation
   // changes.
   virtual void on_size_allocate(Gtk::Allocation& allocation);
 
@@ -99,6 +99,10 @@ class ImageView : public Gtk::ScrolledWindow {
   // to match the new zoomed image size.
   void on_adjustment_changed(Gtk::Orientation orientation);
 
+  // Handlers for panning.
+  bool on_button(GdkEventButton* event);
+  bool on_motion(GdkEventMotion* event);
+
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
   Gtk::Image image;
   Glib::RefPtr<Gtk::Adjustment> hadjustment = get_hadjustment(),
@@ -118,6 +122,9 @@ class ImageView : public Gtk::ScrolledWindow {
   // Zoom factor at the last change to each scrollbar's bounds. Used for
   // calculating the visible center of the image.
   double hadjustment_zoom_factor = 0.0, vadjustment_zoom_factor = 0.0;
+
+  // Point (in screen coordinates) of the last motion event. Used for panning.
+  Point last_motion;
 };
 
 #endif

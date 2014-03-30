@@ -29,6 +29,17 @@ ImageView::ImageView(BaseObjectType* cobject,
                      const Glib::RefPtr<Gtk::Builder>& /*builder*/)
     : Gtk::ScrolledWindow(cobject) {
   add(image);
+
+  Gtk::Widget* viewport = get_child();
+  viewport->add_events(Gdk::BUTTON1_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |
+                       Gdk::BUTTON_RELEASE_MASK);
+  viewport->signal_button_press_event().connect(sigc::mem_fun(
+      *this, &ImageView::on_button));
+  viewport->signal_button_release_event().connect(sigc::mem_fun(
+      *this, &ImageView::on_button));
+  viewport->signal_motion_notify_event().connect(sigc::mem_fun(
+      *this, &ImageView::on_motion));
+
   hadjustment->signal_changed().connect(sigc::bind(sigc::mem_fun(
       *this, &ImageView::on_adjustment_changed), Gtk::ORIENTATION_HORIZONTAL));
   vadjustment->signal_changed().connect(sigc::bind(sigc::mem_fun(
@@ -39,7 +50,7 @@ void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
   this->pixbuf = pixbuf;
   prev_zoom_factor = hadjustment_zoom_factor = vadjustment_zoom_factor = 0.0;
   update();
-  anchor = Point(pixbuf->get_width() * 0.5, 0.0);  // Scroll to the top center.
+  anchor = {pixbuf->get_width() * 0.5, 0.0};  // Scroll to the top center.
   signal_zoom_changed.emit();
 }
 
@@ -113,9 +124,9 @@ void ImageView::update(const Gtk::Allocation& allocation) {
   }
 }
 
-// Defaults to the absolute center of the pixbuf. If the scaled image's width
-// or height is larger than the allocated area, calculates the visible center
-// based on scroll position and zoom factor.
+// Defaults to the absolute center of the pixbuf. If the scaled image is larger
+// than the view, calculates the visible center based on scroll position and
+// zoom factor.
 Point ImageView::get_center() const {
   Point point(pixbuf->get_width() * 0.5, pixbuf->get_height() * 0.5);
   if (hadjustment->get_upper() > hadjustment->get_page_size())
@@ -143,4 +154,35 @@ void ImageView::on_adjustment_changed(Gtk::Orientation orientation) {
                            vadjustment->get_page_size() * 0.5);
     vadjustment_zoom_factor = zoom_factor;
   }
+}
+
+// Handles the left mouse button being pressed and released at the start and
+// end of a pan. Screen coordinates (`event->x_root`) are used because the
+// window coordinates (`event->x`) change as the image is panned, making the
+// delta of two points inaccurate.
+bool ImageView::on_button(GdkEventButton* event) {
+  if (event->button == 1) {
+    if (event->type == GDK_BUTTON_PRESS) {
+      last_motion = {event->x_root, event->y_root};  // Set start point.
+
+      // Show a special cursor only if the image can be panned (i.e. is larger
+      // than the view).
+      if (hadjustment->get_upper() > hadjustment->get_page_size() ||
+          vadjustment->get_upper() > vadjustment->get_page_size())
+        get_window()->set_cursor(Gdk::Cursor::create(Gdk::FLEUR));
+    } else if (event->type == GDK_BUTTON_RELEASE)
+      get_window()->set_cursor();
+  }
+  return false;
+}
+
+// Pans the image as the pointer moves. This is only called while the left
+// mouse button is pressed, since `Gdk::BUTTON1_MOTION_MASK` is used.
+bool ImageView::on_motion(GdkEventMotion* event) {
+  hadjustment->set_value(hadjustment->get_value() - (event->x_root -
+                                                     last_motion.x));
+  vadjustment->set_value(vadjustment->get_value() - (event->y_root -
+                                                     last_motion.y));
+  last_motion = {event->x_root, event->y_root};
+  return true;
 }

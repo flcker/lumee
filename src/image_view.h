@@ -105,8 +105,8 @@ class ImageView : public Gtk::ScrolledWindow {
 
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;  // Original unscaled pixbuf.
   Gtk::Image image;
-  Glib::RefPtr<Gtk::Adjustment> hadjustment = get_hadjustment(),
-                                vadjustment = get_vadjustment();
+  Glib::RefPtr<Gtk::Adjustment> hadjust = get_hadjustment(),
+                                vadjust = get_vadjustment();
 
   double zoom_factor = 1.0;
   ZoomFit zoom_fit = ZOOM_FIT_BEST;
@@ -121,7 +121,7 @@ class ImageView : public Gtk::ScrolledWindow {
 
   // Zoom factor at the last change to each scrollbar's bounds. Used for
   // calculating the visible center of the image.
-  double hadjustment_zoom_factor = 0.0, vadjustment_zoom_factor = 0.0;
+  double hadjust_zoom_factor = 0.0, vadjust_zoom_factor = 0.0;
 
   // Point (in screen coordinates) of the last motion event. Used for panning.
   Point last_motion;

@@ -20,7 +20,7 @@
 #include <gtkmm/scrollbar.h>
 
 const std::vector<double> ImageView::ZOOM_STEPS =
-    {0.10, 0.20, 1/3., 0.5, 2/3., 1.0, 1.5, 2.0, 2.5, 3.0};
+    {0.10, 0.20, 1/3.0, 0.5, 2/3.0, 1.0, 1.5, 2.0, 2.5, 3.0};
 const double ImageView::ZOOM_MULTIPLIER = 1.1;
 const double ImageView::ZOOM_MIN = ZOOM_STEPS.front();
 const double ImageView::ZOOM_MAX = ZOOM_STEPS.back();
@@ -40,18 +40,17 @@ ImageView::ImageView(BaseObjectType* cobject,
   viewport->signal_motion_notify_event().connect(sigc::mem_fun(
       *this, &ImageView::on_motion));
 
-  hadjustment->signal_changed().connect(sigc::bind(sigc::mem_fun(
+  hadjust->signal_changed().connect(sigc::bind(sigc::mem_fun(
       *this, &ImageView::on_adjustment_changed), Gtk::ORIENTATION_HORIZONTAL));
-  vadjustment->signal_changed().connect(sigc::bind(sigc::mem_fun(
+  vadjust->signal_changed().connect(sigc::bind(sigc::mem_fun(
       *this, &ImageView::on_adjustment_changed), Gtk::ORIENTATION_VERTICAL));
 }
 
 void ImageView::set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) {
   this->pixbuf = pixbuf;
-  prev_zoom_factor = hadjustment_zoom_factor = vadjustment_zoom_factor = 0.0;
+  prev_zoom_factor = hadjust_zoom_factor = vadjust_zoom_factor = 0.0;
   update();
-  anchor = {pixbuf->get_width() * 0.5, 0.0};  // Scroll to the top center.
-  signal_zoom_changed.emit();
+  anchor = {pixbuf->get_width() / 2.0, 0.0};  // Scroll to the top center.
 }
 
 void ImageView::clear() {
@@ -86,19 +85,16 @@ void ImageView::zoom_to(double factor) {
 void ImageView::zoom_to_fit(ZoomFit fit) {
   zoom_fit = fit;
   update();
-  signal_zoom_changed.emit();
 }
 
 void ImageView::zoom_to_fit_expand(bool expand) {
   zoom_fit_expand = expand;
   update();
-  signal_zoom_changed.emit();
 }
 
 void ImageView::on_size_allocate(Gtk::Allocation& allocation) {
   update(allocation);
   Gtk::ScrolledWindow::on_size_allocate(allocation);
-  signal_zoom_changed.emit();
 }
 
 void ImageView::update(const Gtk::Allocation& allocation) {
@@ -122,19 +118,21 @@ void ImageView::update(const Gtk::Allocation& allocation) {
                   Gdk::INTERP_BILINEAR));
     prev_zoom_factor = zoom_factor;
   }
+  // Regardless of the if-statement above, a zoom setting may have changed.
+  signal_zoom_changed.emit();
 }
 
 // Defaults to the absolute center of the pixbuf. If the scaled image is larger
 // than the view, calculates the visible center based on scroll position and
 // zoom factor.
 Point ImageView::get_center() const {
-  Point point(pixbuf->get_width() * 0.5, pixbuf->get_height() * 0.5);
-  if (hadjustment->get_upper() > hadjustment->get_page_size())
-    point.x = (hadjustment->get_value() + hadjustment->get_page_size() * 0.5) /
-              hadjustment_zoom_factor;
-  if (vadjustment->get_upper() > vadjustment->get_page_size())
-    point.y = (vadjustment->get_value() + vadjustment->get_page_size() * 0.5) /
-              vadjustment_zoom_factor;
+  Point point(pixbuf->get_width() / 2.0, pixbuf->get_height() / 2.0);
+  if (hadjust->get_upper() > hadjust->get_page_size())
+    point.x = (hadjust->get_value() + hadjust->get_page_size() / 2.0) /
+              hadjust_zoom_factor;
+  if (vadjust->get_upper() > vadjust->get_page_size())
+    point.y = (vadjust->get_value() + vadjust->get_page_size() / 2.0) /
+              vadjust_zoom_factor;
   return point;
 }
 
@@ -144,15 +142,15 @@ Point ImageView::get_center() const {
 // separately.
 void ImageView::on_adjustment_changed(Gtk::Orientation orientation) {
   if (orientation == Gtk::ORIENTATION_HORIZONTAL &&
-      zoom_factor != hadjustment_zoom_factor) {
-    hadjustment->set_value(anchor.x * zoom_factor -
-                           hadjustment->get_page_size() * 0.5);
-    hadjustment_zoom_factor = zoom_factor;
+      zoom_factor != hadjust_zoom_factor) {
+    hadjust->set_value(anchor.x * zoom_factor -
+                       hadjust->get_page_size() / 2.0);
+    hadjust_zoom_factor = zoom_factor;
   } else if (orientation == Gtk::ORIENTATION_VERTICAL &&
-             zoom_factor != vadjustment_zoom_factor) {
-    vadjustment->set_value(anchor.y * zoom_factor -
-                           vadjustment->get_page_size() * 0.5);
-    vadjustment_zoom_factor = zoom_factor;
+             zoom_factor != vadjust_zoom_factor) {
+    vadjust->set_value(anchor.y * zoom_factor -
+                       vadjust->get_page_size() / 2.0);
+    vadjust_zoom_factor = zoom_factor;
   }
 }
 
@@ -167,8 +165,8 @@ bool ImageView::on_button(GdkEventButton* event) {
 
       // Show a special cursor only if the image can be panned (i.e. is larger
       // than the view).
-      if (hadjustment->get_upper() > hadjustment->get_page_size() ||
-          vadjustment->get_upper() > vadjustment->get_page_size())
+      if (hadjust->get_upper() > hadjust->get_page_size() ||
+          vadjust->get_upper() > vadjust->get_page_size())
         get_window()->set_cursor(Gdk::Cursor::create(Gdk::FLEUR));
     } else if (event->type == GDK_BUTTON_RELEASE)
       get_window()->set_cursor();
@@ -179,10 +177,8 @@ bool ImageView::on_button(GdkEventButton* event) {
 // Pans the image as the pointer moves. This is only called while the left
 // mouse button is pressed, since `Gdk::BUTTON1_MOTION_MASK` is used.
 bool ImageView::on_motion(GdkEventMotion* event) {
-  hadjustment->set_value(hadjustment->get_value() - (event->x_root -
-                                                     last_motion.x));
-  vadjustment->set_value(vadjustment->get_value() - (event->y_root -
-                                                     last_motion.y));
+  hadjust->set_value(hadjust->get_value() - (event->x_root - last_motion.x));
+  vadjust->set_value(vadjust->get_value() - (event->y_root - last_motion.y));
   last_motion = {event->x_root, event->y_root};
   return true;
 }

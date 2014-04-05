@@ -90,8 +90,8 @@ void Application::on_startup() {
   // Accelerators that do have a menu item may be duplicated here because they
   // aren't automatically added.
   add_accelerator("<Primary>o", "win.open");
-  add_accelerator("<Primary>equal", "win.zoom-in");
-  add_accelerator("equal", "win.zoom-in-no-step");
+  add_accelerator("<Primary>plus", "win.zoom-in");
+  add_accelerator("plus", "win.zoom-in-no-step");
   add_accelerator("<Primary>minus", "win.zoom-out");
   add_accelerator("minus", "win.zoom-out-no-step");
   add_accelerator("<Primary>0", "win.zoom-normal");

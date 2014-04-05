@@ -4,7 +4,7 @@
       <item>
         <attribute name="label" translatable="yes">Zoom _In</attribute>
         <attribute name="action">win.zoom-in</attribute>
-        <attribute name="accel">&lt;Primary&gt;equal</attribute>
+        <attribute name="accel">&lt;Primary&gt;plus</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Zoom _Out</attribute>

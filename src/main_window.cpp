@@ -68,6 +68,21 @@ void MainWindow::open(Glib::RefPtr<Gio::File> file) {
   header_bar->set_title(Glib::filename_display_basename(folder_path));
 }
 
+// Hack: Trap certain keys and activate a different key's accelerator, so
+// zooming in and out can have multiple keyboard shortcuts.
+//
+// TODO: In gtkmm 3.12, this could be replaced by
+//       `Gtk::Application::set_accels_for_action()`.
+bool MainWindow::on_key_press_event(GdkEventKey* event) {
+  if (event->keyval == GDK_KEY_equal || event->keyval == GDK_KEY_KP_Add)
+    return gtk_accel_groups_activate(G_OBJECT(gobj()), GDK_KEY_plus,
+                                     GdkModifierType(event->state));
+  else if (event->keyval == GDK_KEY_KP_Subtract)
+    return gtk_accel_groups_activate(G_OBJECT(gobj()), GDK_KEY_minus,
+                                     GdkModifierType(event->state));
+  return Gtk::ApplicationWindow::on_key_press_event(event);
+}
+
 bool MainWindow::on_window_state_event(GdkEventWindowState* event) {
   if (event->changed_mask & GDK_WINDOW_STATE_MAXIMIZED)
     settings->set_boolean(

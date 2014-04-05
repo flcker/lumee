@@ -37,6 +37,9 @@ class MainWindow : public Gtk::ApplicationWindow {
   void open(Glib::RefPtr<Gio::File> file);
 
  protected:
+  // Handles additional accelerators for zooming in and out.
+  virtual bool on_key_press_event(GdkEventKey* event);
+
   // Saves the window's maximized state to a setting.
   virtual bool on_window_state_event(GdkEventWindowState* event);
 

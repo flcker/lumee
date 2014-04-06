@@ -95,14 +95,14 @@ void MainWindow::add_actions() {
   action_zoom_in = add_action(
       "zoom-in",
       sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_in), true));
-  action_zoom_in_no_step = add_action(
-      "zoom-in-no-step",
+  action_zoom_in_slight = add_action(
+      "zoom-in-slight",
       sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_in), false));
   action_zoom_out = add_action(
       "zoom-out",
       sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_out), true));
-  action_zoom_out_no_step = add_action(
-      "zoom-out-no-step",
+  action_zoom_out_slight = add_action(
+      "zoom-out-slight",
       sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_out), false));
   add_action("zoom-normal",
              sigc::bind(sigc::mem_fun(image_view, &ImageView::zoom_to), 1.0));
@@ -206,9 +206,9 @@ void MainWindow::on_zoom_changed() {
   zoom_label->get_parent()->get_parent()->set_sensitive(can_zoom);
 
   action_zoom_in->set_enabled(can_zoom && !image_view->zoom_is_max());
-  action_zoom_in_no_step->set_enabled(can_zoom && !image_view->zoom_is_max());
+  action_zoom_in_slight->set_enabled(can_zoom && !image_view->zoom_is_max());
   action_zoom_out->set_enabled(can_zoom && !image_view->zoom_is_min());
-  action_zoom_out_no_step->set_enabled(can_zoom && !image_view->zoom_is_min());
+  action_zoom_out_slight->set_enabled(can_zoom && !image_view->zoom_is_min());
 
   action_zoom_to_fit->set_enabled(can_zoom);
   if (image_view->get_zoom_fit() == ImageView::ZOOM_FIT_NONE) {

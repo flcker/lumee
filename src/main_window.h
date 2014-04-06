@@ -83,8 +83,9 @@ class MainWindow : public Gtk::ApplicationWindow {
 
   Glib::RefPtr<Gio::Settings> settings = Gio::Settings::create(
       "com.github.bmars.Lumee");
-  Glib::RefPtr<Gio::SimpleAction> action_zoom_in, action_zoom_in_no_step,
-      action_zoom_out, action_zoom_out_no_step, action_zoom_to_fit;
+  Glib::RefPtr<Gio::SimpleAction> action_zoom_in, action_zoom_in_slight,
+                                  action_zoom_out, action_zoom_out_slight,
+                                  action_zoom_to_fit;
   Glib::RefPtr<Gio::Action> action_zoom_to_fit_expand;
 
   Gtk::HeaderBar* header_bar = nullptr;

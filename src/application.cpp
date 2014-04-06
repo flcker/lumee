@@ -91,9 +91,9 @@ void Application::on_startup() {
   // aren't automatically added.
   add_accelerator("<Primary>o", "win.open");
   add_accelerator("<Primary>plus", "win.zoom-in");
-  add_accelerator("plus", "win.zoom-in-no-step");
+  add_accelerator("plus", "win.zoom-in-slight");
   add_accelerator("<Primary>minus", "win.zoom-out");
-  add_accelerator("minus", "win.zoom-out-no-step");
+  add_accelerator("minus", "win.zoom-out-slight");
   add_accelerator("<Primary>0", "win.zoom-normal");
   add_accelerator("f", "win.zoom-to-fit", g_variant_new_string("fit-best"));
   add_accelerator("w", "win.zoom-to-fit", g_variant_new_string("fit-width"));

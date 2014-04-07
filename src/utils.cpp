@@ -17,11 +17,6 @@
 
 #include <glibmm/miscutils.h>
 
-#include <climits>
-#include <cmath>
-#include <sstream>
-#include <unistd.h>
-
 bool RuntimeInfo::installed = true;
 std::string RuntimeInfo::data_dir = PKGDATADIR;
 
@@ -66,10 +61,4 @@ double Dimensions::fit(Dimensions target, bool expand, int scrollbar_width)
     }
   }
   return (w / width + h / height) / 2;
-}
-
-std::string to_percentage(double decimal) {
-  std::stringstream s;
-  s << std::round(decimal * 100) << "%";
-  return s.str();
 }

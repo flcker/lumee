@@ -221,7 +221,8 @@ void MainWindow::on_zoom_changed() {
 void MainWindow::sort(const Glib::ustring& mode, bool reversed) {
   Gtk::SortType order = reversed ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING;
   if (mode == "name")
-    image_list->set_sort_column(image_list->columns.display_name, order);
+    image_list->set_sort_column(image_list->columns.display_name_collation_key,
+                                order);
   else if (mode == "modification-date")
     image_list->set_sort_column(image_list->columns.time_modified, order);
 }

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "image_list.h"
+#include "utils.h"
 
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
@@ -30,6 +31,10 @@ const std::string ImageList::FILE_ATTRIBUTES =
     G_FILE_ATTRIBUTE_TIME_MODIFIED;
 
 ImageList::ImageList() {
+  set_column_types(columns);
+  set_sort_func(columns.display_name_collation_key,
+                sigc::mem_fun(*this, &ImageList::compare_display_names));
+
   // Build a list of supported image MIME types.
   for (Gdk::PixbufFormat format : Gdk::Pixbuf::get_formats()) {
     std::vector<Glib::ustring> mime_types = format.get_mime_types();
@@ -63,9 +68,7 @@ Gtk::TreeModel::iterator ImageList::find(const std::string& path) {
 
 // static
 Glib::RefPtr<ImageList> ImageList::create() {
-  Glib::RefPtr<ImageList> model(new ImageList());
-  model->set_column_types(model->columns);
-  return model;
+  return Glib::RefPtr<ImageList>(new ImageList());
 }
 
 // Gets the enumerator and starts the file loop.
@@ -94,9 +97,10 @@ void ImageList::on_next_files(const Glib::RefPtr<Gio::AsyncResult>& result,
       data.slot_folder_ready(false);
     return;
   }
-  for (Glib::RefPtr<Gio::FileInfo> info : files)
+  for (Glib::RefPtr<Gio::FileInfo> info : files) {
     if (!info->is_hidden() && is_supported_mime_type(info->get_content_type()))
       append_file(data.folder->get_path(), info);
+  }
 
   if (files.size())  // Recurse until there are no more files.
     data.enumerator->next_files_async(
@@ -111,15 +115,16 @@ void ImageList::append_file(const std::string& folder_path,
   iterator iter = append();
   Row row = *iter;
   row[columns.path] = Glib::build_filename(folder_path, info->get_name());
-  row[columns.display_name] = info->get_display_name();
   row[columns.time_modified] = info->get_attribute_uint64(
       G_FILE_ATTRIBUTE_TIME_MODIFIED);
-  row[columns.thumbnail_failed] = false;
+  row[columns.display_name_collation_key] = collate_key_for_filename(
+      info->get_display_name());
   row[columns.tooltip] = "<b>" +
-      Glib::Markup::escape_text(row[columns.display_name]) + "</b>\n" +
+      Glib::Markup::escape_text(info->get_display_name()) + "</b>\n" +
       Glib::Markup::escape_text(Glib::DateTime::create_now_local(
           row[columns.time_modified]).format("%c"));
 
+  row[columns.thumbnail_failed] = false;
   image_worker.load(std::bind(&ImageList::on_thumbnail_loaded, this,
                               std::placeholders::_1, iter),
                     row[columns.path], THUMBNAIL_SIZE);
@@ -138,4 +143,11 @@ void ImageList::on_thumbnail_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
     (*iter)[columns.thumbnail] = pixbuf;
   else
     (*iter)[columns.thumbnail_failed] = true;
+}
+
+int ImageList::compare_display_names(const iterator& iter_a,
+                                     const iterator& iter_b) {
+  std::string a = (*iter_a)[columns.display_name_collation_key],
+              b = (*iter_b)[columns.display_name_collation_key];
+  return a.compare(b);
 }

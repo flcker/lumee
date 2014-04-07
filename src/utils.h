@@ -19,8 +19,6 @@
 #include <gdkmm/rectangle.h>
 #include <gdkmm/pixbuf.h>
 
-#include <string>
-
 // Information about the application's runtime environment.
 class RuntimeInfo {
  public:
@@ -71,6 +69,16 @@ struct Point {
 };
 
 // Converts a decimal to its percentage (for example, 0.12 becomes "12%").
-std::string to_percentage(double decimal);
+inline std::string to_percentage(double decimal) {
+  std::stringstream s;
+  s << std::round(decimal * 100) << "%";
+  return s.str();
+}
+
+// Wrapper for `g_utf8_collate_key_for_filename()`.
+inline std::string collate_key_for_filename(const Glib::ustring& filename) {
+  return Glib::convert_return_gchar_ptr_to_stdstring(
+      g_utf8_collate_key_for_filename(filename.data(), filename.size()));
+}
 
 #endif

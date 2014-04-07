@@ -31,15 +31,16 @@ class ImageList : public Gtk::ListStore {
   typedef sigc::slot<void, bool> SlotFolderReady;
 
   struct Columns : public Gtk::TreeModelColumnRecord {
+    Columns() { add(path); add(time_modified); add(thumbnail);
+                add(display_name_collation_key); add(tooltip);
+                add(thumbnail_failed); }
+
     Gtk::TreeModelColumn<std::string> path;
-    Gtk::TreeModelColumn<Glib::ustring> display_name;
     Gtk::TreeModelColumn<guint64> time_modified;
     Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thumbnail;
-    Gtk::TreeModelColumn<bool> thumbnail_failed;
+    Gtk::TreeModelColumn<std::string> display_name_collation_key;
     Gtk::TreeModelColumn<Glib::ustring> tooltip;
-
-    Columns() { add(path); add(display_name); add(time_modified);
-                add(thumbnail); add(thumbnail_failed); add(tooltip); }
+    Gtk::TreeModelColumn<bool> thumbnail_failed;
   };
 
   ImageList();
@@ -92,6 +93,9 @@ class ImageList : public Gtk::ListStore {
   // Updates a row with its thumbnail.
   void on_thumbnail_loaded(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
                            const iterator& iter);
+
+  // Compares the order of two file display names.
+  int compare_display_names(const iterator& iter_a, const iterator& iter_b);
 
   std::vector<Glib::ustring> supported_mime_types;
   ImageWorker image_worker;
